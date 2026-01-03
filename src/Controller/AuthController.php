@@ -11,9 +11,10 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
+#[Route('/api/v1')]
 class AuthController extends AbstractController
 {
-    #[Route('/api/register', name: 'app_register')]
+    #[Route('/register', methods:['POST'], name: 'app_register')]
     public function register(
         Request $request,
         ValidatorInterface $validator,
@@ -53,7 +54,7 @@ class AuthController extends AbstractController
         ], 201);
     }
 
-    #[Route('/api/login', name: 'app_login')]
+    #[Route('/login', methods:['POST'], name: 'app_login')]
     public function login()
     {}
 }
