@@ -16,7 +16,7 @@ class UserAdminController extends AbstractController
 {
     public function __construct(private UserManager $userManager) {}
 
-    #[Route('', methods:['GET'], name: 'app_users')]
+    #[Route(methods:['GET'], name: 'app_users')]
     public function list(
         Request $request
         ): JsonResponse {

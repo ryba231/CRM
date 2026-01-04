@@ -7,6 +7,7 @@ use App\Repository\Contact\ContactRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: ContactRepository::class)]
+#[ORM\HasLifecycleCallbacks]
 class Contact
 {
     #[ORM\Id]
@@ -30,17 +31,28 @@ class Contact
     private ?string $status = null;
 
     #[ORM\Column(length: 50)]
-    private ?string $source = null;
+    private ?string $source = 'Wstepnie null';
 
     #[ORM\Column(nullable: true)]
     private ?array $metadata = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: 'datetime_immutable')]
     private ?\DateTimeImmutable $created_at = null;
+
+    #[ORM\Column(type: 'datetime_immutable')]
+    private ?\DateTimeImmutable $updated_at = null;
 
     #[ORM\ManyToOne(inversedBy: 'contacts')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $owner = null;
+
+    #[ORM\Column(length: 50, nullable: true)]
+    private ?string $type = null;
+
+    public function getFullName() : ?string 
+    {
+        return trim(($this->first_name ?? '') . ' ' . ($this->last_name ?? ''));    
+    }
 
     public function getId(): ?int
     {
@@ -136,11 +148,22 @@ class Contact
         return $this->created_at;
     }
 
-    public function setCreatedAt(\DateTimeImmutable $created_at): static
+    #[ORM\PrePersist]
+    public function setCreatedAt(): void
     {
-        $this->created_at = $created_at;
+        $this->created_at = new \DateTimeImmutable();
+    }
 
-        return $this;
+    public function getUpdatedAt(): ?\DateTimeImmutable
+    {
+        return $this->updated_at;
+    }
+
+    #[ORM\PrePersist]
+    #[ORM\PreUpdate]
+    public function setUpdatedAt(): void
+    {
+        $this->updated_at = new \DateTimeImmutable();
     }
 
     public function getOwner(): ?User
@@ -151,6 +174,18 @@ class Contact
     public function setOwner(?User $owner): static
     {
         $this->owner = $owner;
+
+        return $this;
+    }
+
+    public function getType(): ?string
+    {
+        return $this->type;
+    }
+
+    public function setType(?string $type): static
+    {
+        $this->type = $type;
 
         return $this;
     }

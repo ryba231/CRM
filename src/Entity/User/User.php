@@ -50,6 +50,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->contacts = new ArrayCollection();
     }
 
+    public function getFullName() : ?string 
+    {
+        return trim(($this->first_name ?? '') . ' ' . ($this->last_name ?? ''));    
+    }
 
     public function getId(): ?int
     {

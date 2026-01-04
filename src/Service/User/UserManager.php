@@ -78,7 +78,6 @@ readonly class UserManager
         if($lastName) $user->setLastName($lastName);
         if($roles) $user->setRoles($roles);
 
-        $this->entityManager->persist($user);
         $this->entityManager->flush();
 
         return $user;
