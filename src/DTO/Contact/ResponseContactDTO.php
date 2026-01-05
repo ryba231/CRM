@@ -8,6 +8,7 @@ final class ResponseContactDTO
         public string $email,
         public string $phone,
         public string $status,
+        public string $type,
         public string $created_at,
     )
     {}

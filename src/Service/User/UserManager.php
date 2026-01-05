@@ -3,6 +3,7 @@ namespace App\Service\User;
 
 use App\DTO\User\RegisterUserDTO;
 use App\DTO\User\ResponseMeDTO;
+use App\DTO\User\UpdateUserDTO;
 use App\Entity\User\User;
 use App\Repository\User\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -67,16 +68,13 @@ readonly class UserManager
 
     public function update(
         User $user, 
-        ?string $email,
-        ?string $firstName,
-        ?string $lastName,
-        ?array $roles
+        UpdateUserDTO $dto
     ) : User {
         
-        if($email) $user->setEmail($email);
-        if($firstName) $user->setFirstName($firstName);
-        if($lastName) $user->setLastName($lastName);
-        if($roles) $user->setRoles($roles);
+        if($dto->email) $user->setEmail($dto->email);
+        if($dto->firstName) $user->setFirstName($dto->firstName);
+        if($dto->lastName) $user->setLastName($dto->lastName);
+        if($dto->roles) $user->setRoles($dto->roles);
 
         $this->entityManager->flush();
 

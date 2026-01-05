@@ -2,6 +2,7 @@
 namespace App\Controller;
 
 use App\DTO\User\RegisterUserDTO;
+use App\DTO\User\UpdateUserDTO;
 use App\Entity\User\User;
 use App\Mapper\User\UserMapper;
 use App\Service\User\UserManager;
@@ -101,14 +102,17 @@ class UserAdminController extends AbstractController
          $this->denyAccessUnlessGranted('ROLE_ADMIN');
          $data = json_decode($request->getContent(), true);
 
+        $dto = new UpdateUserDTO();
+        $dto->email = $data['email'] ?? null;
+        $dto->firstName = $data['first_name'] ?? null;
+        $dto->lastName = $data['last_name'] ?? null;
+        $dto->roles = $data['roles'] ?? null;
+
          $user = $this->userManager->get($id);
 
          $this->userManager->update(
             $user,
-            $data['email'] ?? null,  
-            $data['first_name'] ?? null,
-            $data['last_name'] ?? null,
-            $data['password'] ?? null
+            $dto
          );
 
          return $this->json(

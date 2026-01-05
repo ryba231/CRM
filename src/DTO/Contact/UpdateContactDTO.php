@@ -2,16 +2,14 @@
 namespace App\DTO\Contact;
 use Symfony\Component\Validator\Constraints as Assert;
 
-final class CreateContactDTO
+final class UpdateContactDTO
 {
-    #[Assert\NotBlank]
     #[Assert\Email(message: 'Invalid email')]
     #[Assert\Length(max: 255)]
-    public string $email;
+    public ?string $email;
 
-    #[Assert\NotBlank]
     #[Assert\Length(max: 20)]
-    public string $phone;
+    public ?string $phone;
 
     #[Assert\Length(max: 255)]
     public ?string $firstName;
