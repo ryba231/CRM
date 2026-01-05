@@ -9,11 +9,11 @@ final class RegisterUserDTO
 
     #[Assert\NotBlank]
     #[Assert\Length(min: 8)]
-    public string $password;
+    public ?string $password;
 
     #[Assert\Length(max: 255)]
     public ?string $firstName;
-    
+
     #[Assert\Length(max: 255)]
     public ?string $lastName;
 }

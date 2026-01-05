@@ -5,14 +5,13 @@ namespace App\Controller;
 use App\DTO\User\RegisterUserDTO;
 use App\Service\User\UserManager;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route('/api/v1')]
-class AuthController extends AbstractController
+class AuthController extends BaseApiController
 {
     #[Route('/register', methods:['POST'], name: 'app_register')]
     public function register(
@@ -32,16 +31,10 @@ class AuthController extends AbstractController
         $errors = $validator->validate($dto);
 
         if(count($errors) > 0) {
-            return $this->json([
-                'errors' => (string) $errors
-            ], 400);
+           return $this->validationErrorResponse($errors);
         }
 
-        try {
-            $user = $userManager->createUser($dto);
-        } catch (\DomainException $e) {
-            return $this->json(['error' => $e->getMessage()], 409);
-        }
+        $user = $userManager->createUser($dto);
 
         $token = $JWTTokenManager->create($user);
         return $this->json([

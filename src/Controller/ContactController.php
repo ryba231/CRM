@@ -5,20 +5,16 @@ namespace App\Controller;
 use App\DTO\Contact\CreateContactDTO;
 use App\DTO\Contact\UpdateContactDTO;
 use App\Entity\Contact\Contact;
-use App\Form\Contact\ContactType;
 use App\Mapper\Contact\ContactMapper;
-use App\Repository\Contact\ContactRepository;
+use App\Security\Voter\ContactVoter;
 use App\Service\Contact\ContactManager;
-use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route('/api/v1/contact')]
-final class ContactController extends AbstractController
+final class ContactController extends BaseApiController
 {
 
     public function __construct(private ContactManager $contactManager){}
@@ -26,31 +22,28 @@ final class ContactController extends AbstractController
     public function list(
         Request $request
     ): JsonResponse {
-            $page = max(1, $request->query->getInt('page', 1));
-            $limit = min(50, max(1, $request->query->getInt('limit', 10)));
-            $owner = $this->getUser();
 
-            try {
-                $result = $this->contactManager->getAllContact($page, $limit, $owner);
-                $contactsDto = array_map(
-                    fn(Contact $contact) => ContactMapper::toDTO($contact),
-                    $result['items']
-                );
-            } catch(\DomainException $e) {
-                return $this->json(['error' => $e->getMessage()], 404);
-            }
+        $page = max(1, $request->query->getInt('page', 1));
+        $limit = min(50, max(1, $request->query->getInt('limit', 10)));
+        $owner = $this->getUser();
 
-            return $this->json(
-                [
-                    'data' => $contactsDto,
-                    'meta' => [
-                        'page' => $page,
-                        'limit' => $limit,
-                        'total' => $result['total'],
-                        'pages' => (int) ceil($result['total'] / $limit),
-                    ]
-                ],
-                200);
+        $result = $this->contactManager->getAllContact($page, $limit, $owner);
+        $contactsDto = array_map(
+            fn(Contact $contact) => ContactMapper::toDTO($contact),
+            $result['items']
+        );
+
+        return $this->json(
+            [
+                'data' => $contactsDto,
+                'meta' => [
+                    'page' => $page,
+                    'limit' => $limit,
+                    'total' => $result['total'],
+                    'pages' => (int) ceil($result['total'] / $limit),
+                ]
+            ],
+            200);
     }
 
     #[Route(name: 'app_contact_new', methods: ['POST'])]
@@ -73,16 +66,10 @@ final class ContactController extends AbstractController
         $errors = $validator->validate($dto);
 
         if(count($errors) > 0) {
-            return $this->json([
-                'errors' => (string) $errors
-            ], 400);
+            return $this->validationErrorResponse($errors);
         }
 
-        try {
-            $contact = $this->contactManager->createContact($dto, $owner);
-        } catch (\DomainException $e) {
-            return $this->json(['error' => $e->getMessage()], 409);
-        }
+        $contact = $this->contactManager->createContact($dto, $owner);
 
         return $this->json(
             ContactMapper::toDTO($contact),
@@ -94,8 +81,15 @@ final class ContactController extends AbstractController
     public function show(
         int $id
     ): JsonResponse {
+        $contact = $this->contactManager->get($id);
+
+        $this->denyAccessUnlessGranted( 
+            ContactVoter::VIEW,
+            $contact
+        );
+
         return $this->json(
-            ContactMapper::toDTO($this->contactManager->get($id))
+            ContactMapper::toDTO($contact)
         );
     }
 
@@ -105,6 +99,13 @@ final class ContactController extends AbstractController
         Request $request,
         ValidatorInterface $validator
     ): JsonResponse {
+        $contact = $this->contactManager->get($id);
+
+        $this->denyAccessUnlessGranted( 
+            ContactVoter::EDIT,
+            $contact
+        );
+
         $data = json_decode($request->getContent(), true);
 
         $dto = new UpdateContactDTO();
@@ -115,14 +116,10 @@ final class ContactController extends AbstractController
         $dto->status = $data['status'] ?? null;
         $dto->type = $data['type'] ?? null;
 
-        $contact = $this->contactManager->get($id);
-
         $errors = $validator->validate($dto);
 
         if(count($errors) > 0) {
-            return $this->json([
-                'errors' => (string) $errors
-            ], 400);
+           return $this->validationErrorResponse($errors);
         }
 
         $this->contactManager->update(
@@ -140,9 +137,13 @@ final class ContactController extends AbstractController
     public function delete(
         int $id
     ): JsonResponse {
-        $this->contactManager->delete(
-            $this->contactManager->get($id)
+        $contact = $this->contactManager->get($id);
+         $this->denyAccessUnlessGranted( 
+            ContactVoter::EDIT,
+            $contact
         );
+
+        $this->contactManager->delete($contact);
 
         return $this->json(null, 204);
     }

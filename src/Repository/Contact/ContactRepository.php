@@ -7,6 +7,7 @@ use App\Entity\User\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * @extends ServiceEntityRepository<Contact>
@@ -41,11 +42,11 @@ class ContactRepository extends ServiceEntityRepository
     public function findOrFail(
         int $id
     ) : Contact {
-        $contact = $this->find($id);
+        $contact = $this->findOne($id);
         
         if(!$contact)
         {
-            throw new \RuntimeException('Contact not found');
+            throw new NotFoundHttpException('Contact not found');
         }
 
         return $contact;

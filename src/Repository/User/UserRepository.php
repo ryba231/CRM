@@ -6,6 +6,7 @@ use App\Entity\User\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * @extends ServiceEntityRepository<User>
@@ -34,11 +35,11 @@ class UserRepository extends ServiceEntityRepository
     }
 
     public function findOrFail(int $id) : User {
-        $user = $this->find($id);
+        $user = $this->findOne($id);
 
         if(!$user)
         {
-            throw new \RuntimeException('User not found');
+            throw new NotFoundHttpException('User not found');
         }
 
         return $user;

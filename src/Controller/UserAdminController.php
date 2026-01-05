@@ -13,7 +13,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route('/api/v1/admin/users')]
-class UserAdminController extends AbstractController
+class UserAdminController extends BaseApiController
 {
     public function __construct(private UserManager $userManager) {}
 
@@ -25,15 +25,12 @@ class UserAdminController extends AbstractController
             
             $page = max(1, $request->query->getInt('page', 1));
             $limit = min(50, max(1, $request->query->getInt('limit', 10)));
-            try {
-                $result = $this->userManager->getAllUsers($page, $limit);
-                $usersDto = array_map(
-                    fn(User $user) => UserMapper::toDTO($user), 
-                    $result['items']
-                );
-            } catch(\DomainException $e) {
-                return $this->json(['error' => $e->getMessage()], 404);
-            }
+            
+            $result = $this->userManager->getAllUsers($page, $limit);
+            $usersDto = array_map(
+                fn(User $user) => UserMapper::toDTO($user), 
+                $result['items']
+            );
 
             return $this->json(
                 [
@@ -77,16 +74,10 @@ class UserAdminController extends AbstractController
         $errors = $validator->validate($dto);
 
         if(count($errors) > 0) {
-            return $this->json([
-                'errors' => (string) $errors
-            ], 400);
+            return $this->validationErrorResponse($errors);
         }
 
-        try {
-            $user = $this->userManager->createUser($dto);
-        } catch (\DomainException $e) {
-            return $this->json(['error' => $e->getMessage()], 409);
-        }
+        $user = $this->userManager->createUser($dto);
 
         return $this->json(
             UserMapper::toDTO($user),
@@ -97,10 +88,11 @@ class UserAdminController extends AbstractController
     #[Route('/{id}', methods:['PATCH'], name: 'app_user_update')]
     public function update(
         int $id,
-        Request $request
+        Request $request,
+        ValidatorInterface $validator
     ) : JsonResponse {
-         $this->denyAccessUnlessGranted('ROLE_ADMIN');
-         $data = json_decode($request->getContent(), true);
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        $data = json_decode($request->getContent(), true);
 
         $dto = new UpdateUserDTO();
         $dto->email = $data['email'] ?? null;
@@ -108,14 +100,20 @@ class UserAdminController extends AbstractController
         $dto->lastName = $data['last_name'] ?? null;
         $dto->roles = $data['roles'] ?? null;
 
-         $user = $this->userManager->get($id);
+        $errors = $validator->validate($dto);
 
-         $this->userManager->update(
-            $user,
-            $dto
-         );
+        if(count($errors) > 0) {
+           return $this->validationErrorResponse($errors);
+        }
 
-         return $this->json(
+        $user = $this->userManager->get($id);
+
+        $this->userManager->update(
+           $user,
+           $dto
+        );
+
+        return $this->json(
             UserMapper::toDTO($user)
         );
     }

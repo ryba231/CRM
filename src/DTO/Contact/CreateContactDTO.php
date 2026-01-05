@@ -7,11 +7,11 @@ final class CreateContactDTO
     #[Assert\NotBlank]
     #[Assert\Email(message: 'Invalid email')]
     #[Assert\Length(max: 255)]
-    public string $email;
+    public ?string $email;
 
     #[Assert\NotBlank]
     #[Assert\Length(max: 20)]
-    public string $phone;
+    public ?string $phone;
 
     #[Assert\Length(max: 255)]
     public ?string $firstName;
