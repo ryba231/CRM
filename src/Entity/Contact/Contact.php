@@ -3,6 +3,7 @@
 namespace App\Entity\Contact;
 
 use App\Entity\User\User;
+use App\Entity\Workspace\Workspace;
 use App\Repository\Contact\ContactRepository;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -48,6 +49,10 @@ class Contact
 
     #[ORM\Column(length: 50, nullable: true)]
     private ?string $type = null;
+
+    #[ORM\ManyToOne(inversedBy: 'contacts')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Workspace $workspace = null;
 
     public function getFullName() : ?string 
     {
@@ -186,6 +191,18 @@ class Contact
     public function setType(?string $type): static
     {
         $this->type = $type;
+
+        return $this;
+    }
+
+    public function getWorkspace(): ?Workspace
+    {
+        return $this->workspace;
+    }
+
+    public function setWorkspace(?Workspace $workspace): static
+    {
+        $this->workspace = $workspace;
 
         return $this;
     }

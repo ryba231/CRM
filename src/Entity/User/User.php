@@ -3,6 +3,7 @@
 namespace App\Entity\User;
 
 use App\Entity\Contact\Contact;
+use App\Entity\Workspace\WorkspaceUser;
 use App\Repository\User\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -45,9 +46,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Contact::class, mappedBy: 'owner')]
     private Collection $contacts;
 
+    /**
+     * @var Collection<int, WorkspaceUser>
+     */
+    #[ORM\OneToMany(targetEntity: WorkspaceUser::class, mappedBy: 'user')]
+    private Collection $workspaceMemberships;
+
     public function __construct()
     {
         $this->contacts = new ArrayCollection();
+        $this->workspaceMemberships = new ArrayCollection();
     }
 
     public function getFullName() : ?string 
@@ -164,6 +172,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($contact->getOwner() === $this) {
                 $contact->setOwner(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, WorkspaceUser>
+     */
+    public function getWorkspaceMemberships(): Collection
+    {
+        return $this->workspaceMemberships;
+    }
+
+    public function addWorkspaceMembership(WorkspaceUser $workspaceMembership): static
+    {
+        if (!$this->workspaceMemberships->contains($workspaceMembership)) {
+            $this->workspaceMemberships->add($workspaceMembership);
+            $workspaceMembership->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeWorkspaceMembership(WorkspaceUser $workspaceMembership): static
+    {
+        if ($this->workspaceMemberships->removeElement($workspaceMembership)) {
+            // set the owning side to null (unless already changed)
+            if ($workspaceMembership->getUser() === $this) {
+                $workspaceMembership->setUser(null);
             }
         }
 

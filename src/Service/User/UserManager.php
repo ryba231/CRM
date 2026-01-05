@@ -5,6 +5,8 @@ use App\DTO\User\RegisterUserDTO;
 use App\DTO\User\ResponseMeDTO;
 use App\DTO\User\UpdateUserDTO;
 use App\Entity\User\User;
+use App\Entity\Workspace\Workspace;
+use App\Entity\Workspace\WorkspaceUser;
 use App\Repository\User\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -35,7 +37,17 @@ readonly class UserManager
             $this->passwordHasher->hashPassword($user, $dto->password)
         );
 
+        $workspace = new Workspace();
+        $workspace->setName("Workspace: " . $user->getEmail());
+
+        $workspaceUser = new WorkspaceUser();
+        $workspaceUser->setUser($user);
+        $workspaceUser->setWorkspace($workspace);
+        $workspaceUser->setRole('owner');
+
+        $this->entityManager->persist($workspace);
         $this->entityManager->persist($user);
+        $this->entityManager->persist($workspaceUser);
         $this->entityManager->flush();
 
         return $user;
