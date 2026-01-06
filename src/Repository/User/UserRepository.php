@@ -35,7 +35,7 @@ class UserRepository extends ServiceEntityRepository
     }
 
     public function findOrFail(int $id) : User {
-        $user = $this->findOne($id);
+        $user = $this->find($id);
 
         if(!$user)
         {

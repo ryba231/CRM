@@ -4,6 +4,7 @@ namespace App\Repository\Contact;
 
 use App\Entity\Contact\Contact;
 use App\Entity\User\User;
+use App\Entity\Workspace\Workspace;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ManagerRegistry;
@@ -19,7 +20,7 @@ class ContactRepository extends ServiceEntityRepository
         parent::__construct($registry, Contact::class);
     }
 
-    public function findPaginatedByOwner(
+    public function findByOwnerPaginated(
         int $page,
         int $limit,
         User $owner
@@ -42,7 +43,7 @@ class ContactRepository extends ServiceEntityRepository
     public function findOrFail(
         int $id
     ) : Contact {
-        $contact = $this->findOne($id);
+        $contact = $this->find($id);
         
         if(!$contact)
         {
@@ -50,6 +51,33 @@ class ContactRepository extends ServiceEntityRepository
         }
 
         return $contact;
+    }
+
+    public function findByWorkspacePaginated(
+        Workspace $workspace,
+        int $page,
+        int $limit,
+        ?string $search
+    ) : array {
+        $qb = $this->createQueryBuilder('c')
+            ->andWhere('c.workspace = :workspace')
+            ->setParameter('workspace', $workspace);
+
+        if($search) {
+            $qb->andWhere('(c.first_name LIKE :s OR c.last_name LIKE :s)')
+                ->setParameter('s', "%$search%");
+        }
+
+        $qb->setFirstResult(($page - 1) * $limit)
+            ->setMaxResults($limit);
+
+        $paginator = new Paginator($qb);
+        $total = count($paginator);
+
+        return [
+            'items' => iterator_to_array($paginator),
+            'total' => $total
+        ];
     }
 
     //    /**

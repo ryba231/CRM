@@ -9,6 +9,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: WorkspaceRepository::class)]
+#[ORM\HasLifecycleCallbacks]
 class Workspace
 {
     #[ORM\Id]
@@ -28,8 +29,14 @@ class Workspace
     /**
      * @var Collection<int, WorkspaceUser>
      */
-    #[ORM\OneToMany(targetEntity: WorkspaceUser::class, mappedBy: 'workspace')]
+    #[ORM\OneToMany(targetEntity: WorkspaceUser::class, mappedBy: 'workspace', cascade: ['remove'], orphanRemoval: true)]
     private Collection $memberships;
+
+    #[ORM\Column(type: 'datetime_immutable')]
+    private ?\DateTimeImmutable $created_at = null;
+
+    #[ORM\Column(type: 'datetime_immutable')]
+    private ?\DateTimeImmutable $updated_at = null;
 
     public function __construct()
     {
@@ -112,5 +119,28 @@ class Workspace
         }
 
         return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeImmutable
+    {
+        return $this->created_at;
+    }
+
+    #[ORM\PrePersist]
+    public function setCreatedAt(): void
+    {
+        $this->created_at = new \DateTimeImmutable();
+    }
+
+    public function getUpdatedAt(): ?\DateTimeImmutable
+    {
+        return $this->updated_at;
+    }
+
+    #[ORM\PrePersist]
+    #[ORM\PreUpdate]
+    public function setUpdatedAt(): void
+    {
+         $this->updated_at = new \DateTimeImmutable();
     }
 }

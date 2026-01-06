@@ -7,6 +7,7 @@ use App\Repository\Workspace\WorkspaceUserRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: WorkspaceUserRepository::class)]
+#[ORM\HasLifecycleCallbacks]
 class WorkspaceUser
 {
     #[ORM\Id]
@@ -22,6 +23,9 @@ class WorkspaceUser
 
     #[ORM\Column(length: 50)]
     private ?string $role = null;
+
+    #[ORM\Column(type: 'datetime_immutable')]
+    private ?\DateTimeImmutable $created_at = null;
 
     public function getId(): ?int
     {
@@ -62,5 +66,16 @@ class WorkspaceUser
         $this->role = $role;
 
         return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeImmutable
+    {
+        return $this->created_at;
+    }
+
+    #[ORM\PrePersist]
+    public function setCreatedAt(): void
+    {
+        $this->created_at = new \DateTimeImmutable();
     }
 }

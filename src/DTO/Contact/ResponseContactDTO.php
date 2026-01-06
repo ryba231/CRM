@@ -1,4 +1,6 @@
 <?php
+namespace App\DTO\Contact;
+
 final class ResponseContactDTO
 {
     

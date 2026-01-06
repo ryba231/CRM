@@ -5,6 +5,7 @@ use App\DTO\Contact\CreateContactDTO;
 use App\DTO\Contact\UpdateContactDTO;
 use App\Entity\Contact\Contact;
 use App\Entity\User\User;
+use App\Entity\Workspace\Workspace;
 use App\Repository\Contact\ContactRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -47,7 +48,16 @@ readonly class ContactManager
         int $limit,
         User $owner
     ) : array {
-        return $this->contactRepository->findPaginatedByOwner($page, $limit, $owner);
+        return $this->contactRepository->findByOwnerPaginated($page, $limit, $owner);
+    }
+
+    public function getAllContactByWorkspace(
+        Workspace $workspace,
+        int $page,
+        int $limit,
+        ?string $search 
+    ) : array {
+        return $this->contactRepository->findByWorkspacePaginated($workspace, $page, $limit, $search);
     }
 
     public function update(

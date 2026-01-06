@@ -1,8 +1,8 @@
 <?php
 namespace App\Mapper\Contact;
 
+use App\DTO\Contact\ResponseContactDTO;
 use App\Entity\Contact\Contact;
-use ResponseContactDTO;
 
 class ContactMapper
 {

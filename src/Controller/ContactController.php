@@ -8,6 +8,7 @@ use App\Entity\Contact\Contact;
 use App\Mapper\Contact\ContactMapper;
 use App\Security\Voter\ContactVoter;
 use App\Service\Contact\ContactManager;
+use App\Service\Workspace\WorkspaceManager;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
@@ -17,17 +18,24 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 final class ContactController extends BaseApiController
 {
 
-    public function __construct(private ContactManager $contactManager){}
+    public function __construct(
+        private ContactManager $contactManager,
+        private WorkspaceManager $workspaceManager
+        ){}
     #[Route(name: 'app_contact_list', methods: ['GET'])]
     public function list(
         Request $request
     ): JsonResponse {
+        $workspaceId = (int) $request->headers->get('X-Workspace-Id');
+
+        if(!$workspaceId) throw new \DomainException('Workspace header missing');
+
+        $workspace = $this->workspaceManager->getCurrentWorkspace($workspaceId, $this->getUser());
 
         $page = max(1, $request->query->getInt('page', 1));
         $limit = min(50, max(1, $request->query->getInt('limit', 10)));
-        $owner = $this->getUser();
 
-        $result = $this->contactManager->getAllContact($page, $limit, $owner);
+        $result = $this->contactManager->getAllContactByWorkspace($workspace, $page, $limit, null);
         $contactsDto = array_map(
             fn(Contact $contact) => ContactMapper::toDTO($contact),
             $result['items']

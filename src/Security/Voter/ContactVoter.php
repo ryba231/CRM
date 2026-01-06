@@ -32,6 +32,11 @@ final class ContactVoter extends Voter
             return true;
         }
 
+        /*if($contact->getWorkspace()->getId() !== $user->getCurrentWorksapce()->getId())
+        {
+            return false;
+        }*/
+
         return $contact->getOwner()->getId() === $user->getId();
     }
 }
