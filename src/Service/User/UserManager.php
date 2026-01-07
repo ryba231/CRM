@@ -12,7 +12,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
-readonly class UserManager
+final class UserManager
 {
     public function __construct(
         private EntityManagerInterface      $entityManager,
@@ -55,12 +55,12 @@ readonly class UserManager
 
     public function get(
         int $id
-    ) : User  { 
+    ) : User  {
         return $this->userRepository->findOrFail($id);
     }
 
     public function getAllUsers(
-        int $page, 
+        int $page,
         int $limit
     ): array {
         return $this->userRepository->findPaginated($page, $limit);
@@ -75,14 +75,14 @@ readonly class UserManager
         }
 
         return ResponseMeDTO::fromUser($user);
-        
+
     }
 
     public function update(
-        User $user, 
+        User $user,
         UpdateUserDTO $dto
     ) : User {
-        
+
         if($dto->email) $user->setEmail($dto->email);
         if($dto->firstName) $user->setFirstName($dto->firstName);
         if($dto->lastName) $user->setLastName($dto->lastName);

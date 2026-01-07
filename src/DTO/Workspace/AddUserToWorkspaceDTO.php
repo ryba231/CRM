@@ -8,6 +8,6 @@ final class AddUserToWorkspaceDTO {
     #[Assert\NotBlank]
     public ?int $userId = null;
 
-    #[Assert\Choice('admin','member')]
+    #[Assert\Choice(choices:['admin','member'])]
     public ?string $role = null;
 }

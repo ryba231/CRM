@@ -9,7 +9,7 @@ use App\Entity\Workspace\Workspace;
 use App\Repository\Contact\ContactRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
-readonly class ContactManager
+final class ContactManager
 {
     public function __construct(
         private EntityManagerInterface $entityManager,
@@ -19,7 +19,8 @@ readonly class ContactManager
 
     public function createContact(
         CreateContactDTO $dto,
-        User $owner
+        User $owner,
+        Workspace $workspace
     ) : Contact {
 
         $contact = new Contact();
@@ -30,7 +31,8 @@ readonly class ContactManager
         $contact->setOwner($owner);
         $contact->setStatus($dto->status ?? 'new');
         $contact->setType($dto->type);
-        
+        $contact->setWorkspace($workspace);
+
         $this->entityManager->persist($contact);
         $this->entityManager->flush();
 
@@ -40,7 +42,7 @@ readonly class ContactManager
     public function get(
         int $id
     ) : Contact {
-        return $this->contactRepository->findOrFail($id);    
+        return $this->contactRepository->findOrFail($id);
     }
 
     public function getAllContact(
@@ -55,7 +57,7 @@ readonly class ContactManager
         Workspace $workspace,
         int $page,
         int $limit,
-        ?string $search 
+        ?string $search
     ) : array {
         return $this->contactRepository->findByWorkspacePaginated($workspace, $page, $limit, $search);
     }
@@ -64,7 +66,7 @@ readonly class ContactManager
         Contact $contact,
         UpdateContactDTO $dto
     ) : Contact {
-        
+
         if($dto->email) $contact->setEmail($dto->email);
         if($dto->firstName) $contact->setFirstName($dto->firstName);
         if($dto->lastName) $contact->setLastName($dto->lastName);

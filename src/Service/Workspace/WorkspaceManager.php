@@ -11,7 +11,7 @@ use App\Repository\Workspace\WorkspaceRepository;
 use App\Repository\Workspace\WorkspaceUserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
-readonly class WorkspaceManager {
+final class WorkspaceManager {
     public function __construct(
         private EntityManagerInterface $entityManager,
         private WorkspaceRepository $workspaceRepository,
@@ -22,7 +22,7 @@ readonly class WorkspaceManager {
         CreateWorkspaceDTO $dto,
         User $owner
     ) : Workspace {
-        
+
         $workspace = new Workspace;
         $workspace->setName($dto->name);
 
@@ -41,7 +41,7 @@ readonly class WorkspaceManager {
     public function get(
         int $id
     ) : Workspace {
-        return $this->workspaceRepository->findOrFail($id);       
+        return $this->workspaceRepository->findOrFail($id);
     }
 
     public function getAllWorkspace(

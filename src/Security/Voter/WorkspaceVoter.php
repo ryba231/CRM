@@ -2,15 +2,15 @@
 
 namespace App\Security\Voter;
 
-use App\Entity\Contact\Contact;
 use App\Entity\User\User;
+use App\Entity\Workspace\Workspace;
 use App\Security\Enum\PermissionType;
 use App\Security\RolePermissionMap;
 use App\Service\Workspace\WorkspaceContextResolver;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 
-final class ContactVoter extends Voter
+final class WorkspaceVoter extends Voter
 {
     public function __construct(
         private RolePermissionMap $rolePermissionMap,
@@ -19,13 +19,15 @@ final class ContactVoter extends Voter
 
     protected function supports(string $attribute, mixed $subject): bool
     {
-        if(!$subject instanceof Contact) return false;
+        if(!$subject instanceof Workspace) return false;
 
         return in_array($attribute, [
             PermissionType::CONTACT_VIEW->value,
             PermissionType::CONTACT_CREATE->value,
-            PermissionType::CONTACT_EDIT->value,
-            PermissionType::CONTACT_DELETE->value,
+            PermissionType::WORKSPACE_MANAGE->value,
+            PermissionType::USER_EDIT->value,
+            PermissionType::USER_INVITE->value,
+            PermissionType::USER_VIEW->value,
         ], true);
     }
 
@@ -36,6 +38,7 @@ final class ContactVoter extends Voter
     ): bool {
         $user = $token->getUser();
 
+        // if the user is anonymous, do not grant access
         if (!$user instanceof User) {
             return false;
         }
@@ -45,26 +48,20 @@ final class ContactVoter extends Voter
             return true;
         }
 
-        /** @var Contact $contact */
-        $contact = $subject;
+        /** @var Workspace $workspace */
+        $workspace = $subject;
         $permission = PermissionType::from($attribute);
 
-        $workspaceUser = $this->workspaceContextResolver->resolve($user, $contact->getWorkspace());
+        $workspaceUser = $this->workspaceContextResolver->resolve($user, $workspace);
 
         if (!$workspaceUser) {
             return false;
-        }
-
-        if (
-            $permission === PermissionType::CONTACT_EDIT
-            && $contact->getOwner() === $user->getId())
-        {
-            return true;
         }
 
         return $this->rolePermissionMap->roleHasPermission(
             $workspaceUser->getRole(),
             $permission
         );
+
     }
 }

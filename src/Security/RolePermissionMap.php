@@ -4,9 +4,9 @@ namespace App\Security;
 use App\Security\Enum\PermissionType;
 use App\Security\Enum\WorkspaceRoleType;
 
-class RolePermissionMap
+final class RolePermissionMap
 {
-    public static function getPermissions(
+    public function permissionsForRole(
         WorkspaceRoleType $role
     ) : array {
         return match ($role) {
@@ -27,5 +27,17 @@ class RolePermissionMap
                 PermissionType::CONTACT_EDIT,
             ]
         };
+    }
+
+    public function roleHasPermission(
+        WorkspaceRoleType $role,
+        PermissionType $permission
+    ): bool
+    {
+        return in_array(
+            $permission,
+            $this->permissionsForRole($role),
+            true
+        );
     }
 }

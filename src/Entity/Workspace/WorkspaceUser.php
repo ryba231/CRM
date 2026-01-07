@@ -4,6 +4,7 @@ namespace App\Entity\Workspace;
 
 use App\Entity\User\User;
 use App\Repository\Workspace\WorkspaceUserRepository;
+use App\Security\Enum\WorkspaceRoleType;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: WorkspaceUserRepository::class)]
@@ -56,9 +57,9 @@ class WorkspaceUser
         return $this;
     }
 
-    public function getRole(): ?string
+    public function getRole(): WorkspaceRoleType
     {
-        return $this->role;
+        return WorkspaceRoleType::from($this->role);
     }
 
     public function setRole(string $role): static

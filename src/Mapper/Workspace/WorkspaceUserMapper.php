@@ -12,7 +12,7 @@ class WorkspaceUserMapper
         return new ResponseListWorkspaceDTO(
             $workspaceUser->getId(),
             $workspaceUser->getWorkspace()->getName(),
-            $workspaceUser->getRole(),
+            $workspaceUser->getRole()->value,
             $workspaceUser->getWorkspace()->getCreatedAt()->format('Y-m-d H:i:s'),
             $workspaceUser->getWorkspace()->getUpdatedAt()->format('Y-m-d H:i:s')
         );

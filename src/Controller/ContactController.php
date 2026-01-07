@@ -5,8 +5,9 @@ namespace App\Controller;
 use App\DTO\Contact\CreateContactDTO;
 use App\DTO\Contact\UpdateContactDTO;
 use App\Entity\Contact\Contact;
+use App\Entity\User\User;
 use App\Mapper\Contact\ContactMapper;
-use App\Security\Voter\ContactVoter;
+use App\Security\Enum\PermissionType;
 use App\Service\Contact\ContactManager;
 use App\Service\Workspace\WorkspaceManager;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -32,6 +33,11 @@ final class ContactController extends BaseApiController
 
         $workspace = $this->workspaceManager->getCurrentWorkspace($workspaceId, $this->getUser());
 
+        $this->denyAccessUnlessGranted(
+            PermissionType::CONTACT_VIEW->value,
+            $workspace
+        );
+
         $page = max(1, $request->query->getInt('page', 1));
         $limit = min(50, max(1, $request->query->getInt('limit', 10)));
 
@@ -50,8 +56,7 @@ final class ContactController extends BaseApiController
                     'total' => $result['total'],
                     'pages' => (int) ceil($result['total'] / $limit),
                 ]
-            ],
-            200);
+            ]);
     }
 
     #[Route(name: 'app_contact_new', methods: ['POST'])]
@@ -59,6 +64,17 @@ final class ContactController extends BaseApiController
         Request $request,
         ValidatorInterface $validator
     ): JsonResponse {
+        $workspaceId = (int) $request->headers->get('X-Workspace-Id');
+
+        if(!$workspaceId) throw new \DomainException('Workspace header missing');
+
+        $workspace = $this->workspaceManager->getCurrentWorkspace($workspaceId, $this->getUser());
+
+        $this->denyAccessUnlessGranted(
+            PermissionType::CONTACT_CREATE->value,
+            $workspace
+        );
+
         $data = json_decode($request->getContent(), true);
 
         $dto = new CreateContactDTO();
@@ -69,6 +85,7 @@ final class ContactController extends BaseApiController
         $dto->status = $data['status'] ?? null;
         $dto->type = $data['type'] ?? null;
 
+        /** @var User $owner */
         $owner = $this->getUser();
 
         $errors = $validator->validate($dto);
@@ -77,7 +94,7 @@ final class ContactController extends BaseApiController
             return $this->validationErrorResponse($errors);
         }
 
-        $contact = $this->contactManager->createContact($dto, $owner);
+        $contact = $this->contactManager->createContact($dto, $owner, $workspace);
 
         return $this->json(
             ContactMapper::toDTO($contact),
@@ -92,7 +109,7 @@ final class ContactController extends BaseApiController
         $contact = $this->contactManager->get($id);
 
         $this->denyAccessUnlessGranted(
-            ContactVoter::VIEW,
+            PermissionType::CONTACT_VIEW->value,
             $contact
         );
 
@@ -110,7 +127,7 @@ final class ContactController extends BaseApiController
         $contact = $this->contactManager->get($id);
 
         $this->denyAccessUnlessGranted(
-            ContactVoter::EDIT,
+            PermissionType::CONTACT_EDIT->value,
             $contact
         );
 
@@ -136,8 +153,7 @@ final class ContactController extends BaseApiController
         );
 
         return $this->json(
-            ContactMapper::toDTO($contact),
-            200
+            ContactMapper::toDTO($contact)
         );
     }
 
@@ -146,8 +162,9 @@ final class ContactController extends BaseApiController
         int $id
     ): JsonResponse {
         $contact = $this->contactManager->get($id);
-         $this->denyAccessUnlessGranted(
-            ContactVoter::EDIT,
+
+        $this->denyAccessUnlessGranted(
+            PermissionType::CONTACT_DELETE->value,
             $contact
         );
 

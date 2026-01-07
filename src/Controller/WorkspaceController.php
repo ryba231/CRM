@@ -8,6 +8,7 @@ use App\DTO\Workspace\UpdateWorkspaceDTO;
 use App\Entity\Workspace\WorkspaceUser;
 use App\Mapper\Workspace\WorkspaceMapper;
 use App\Mapper\Workspace\WorkspaceUserMapper;
+use App\Security\Enum\PermissionType;
 use App\Service\Workspace\WorkspaceManager;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -81,6 +82,11 @@ final class WorkspaceController extends BaseApiController
     ) : JsonResponse {
         $workspace = $this->workspaceManager->get($id);
 
+        $this->denyAccessUnlessGranted(
+            PermissionType::WORKSPACE_MANAGE->value,
+            $workspace
+        );
+
         return $this->json(
             WorkspaceMapper::toDTO($workspace)
         );
@@ -93,6 +99,11 @@ final class WorkspaceController extends BaseApiController
         ValidatorInterface $validator
     ) : JsonResponse {
         $workspace = $this->workspaceManager->get($id);
+
+        $this->denyAccessUnlessGranted(
+            PermissionType::WORKSPACE_MANAGE->value,
+            $workspace
+        );
 
         $data = json_decode($request->getContent(), true);
         $dto = new UpdateWorkspaceDTO();
@@ -120,6 +131,11 @@ final class WorkspaceController extends BaseApiController
     ) : JsonResponse {
         $workspace = $this->workspaceManager->get($id);
 
+        $this->denyAccessUnlessGranted(
+            PermissionType::WORKSPACE_MANAGE->value,
+            $workspace
+        );
+
         $this->workspaceManager->delete($workspace);
 
         return $this->json(null, 204);
@@ -132,6 +148,11 @@ final class WorkspaceController extends BaseApiController
         ValidatorInterface $validator
     ) : JsonResponse{
         $workspace = $this->workspaceManager->get($id);
+
+        $this->denyAccessUnlessGranted(
+            PermissionType::USER_INVITE->value,
+            $workspace
+        );
 
         $data = json_decode($request->getContent(), true);
         $dto = new AddUserToWorkspaceDTO();
