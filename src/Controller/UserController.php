@@ -9,7 +9,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class UserController extends AbstractController
 {
-    #[Route('/api/v1/me', methods:['GET'], name: 'app_me')]
+    #[Route('/api/v1/me', name: 'app_me', methods:['GET'])]
     public function me(
         UserManager $userManager
         ) : JsonResponse {

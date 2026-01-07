@@ -91,7 +91,7 @@ final class ContactController extends BaseApiController
     ): JsonResponse {
         $contact = $this->contactManager->get($id);
 
-        $this->denyAccessUnlessGranted( 
+        $this->denyAccessUnlessGranted(
             ContactVoter::VIEW,
             $contact
         );
@@ -109,7 +109,7 @@ final class ContactController extends BaseApiController
     ): JsonResponse {
         $contact = $this->contactManager->get($id);
 
-        $this->denyAccessUnlessGranted( 
+        $this->denyAccessUnlessGranted(
             ContactVoter::EDIT,
             $contact
         );
@@ -146,7 +146,7 @@ final class ContactController extends BaseApiController
         int $id
     ): JsonResponse {
         $contact = $this->contactManager->get($id);
-         $this->denyAccessUnlessGranted( 
+         $this->denyAccessUnlessGranted(
             ContactVoter::EDIT,
             $contact
         );

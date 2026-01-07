@@ -17,18 +17,18 @@ class UserAdminController extends BaseApiController
 {
     public function __construct(private UserManager $userManager) {}
 
-    #[Route(methods:['GET'], name: 'app_users')]
+    #[Route(name: 'app_users', methods: ['GET'])]
     public function list(
         Request $request
         ): JsonResponse {
             $this->denyAccessUnlessGranted('ROLE_ADMIN');
-            
+
             $page = max(1, $request->query->getInt('page', 1));
             $limit = min(50, max(1, $request->query->getInt('limit', 10)));
-            
+
             $result = $this->userManager->getAllUsers($page, $limit);
             $usersDto = array_map(
-                fn(User $user) => UserMapper::toDTO($user), 
+                fn(User $user) => UserMapper::toDTO($user),
                 $result['items']
             );
 
@@ -41,11 +41,11 @@ class UserAdminController extends BaseApiController
                         'total' => $result['total'],
                         'pages' => (int) ceil($result['total'] / $limit),
                     ]
-                ], 
+                ],
                 200);
     }
 
-    #[Route('/{id}', methods:['GET'], name: 'app_user_get')]
+    #[Route('/{id}', name: 'app_user_get', methods: ['GET'])]
     public function get(
         int $id
     ) : JsonResponse {
@@ -56,7 +56,7 @@ class UserAdminController extends BaseApiController
         );
     }
 
-    #[Route('', methods:['POST'], name: 'app_users_create')]
+    #[Route('', name: 'app_users_create', methods: ['POST'])]
     public function create(
         Request $request,
         ValidatorInterface $validator
@@ -85,7 +85,7 @@ class UserAdminController extends BaseApiController
         );
     }
 
-    #[Route('/{id}', methods:['PATCH'], name: 'app_user_update')]
+    #[Route('/{id}', name: 'app_user_update', methods: ['PATCH'])]
     public function update(
         int $id,
         Request $request,
@@ -118,14 +118,14 @@ class UserAdminController extends BaseApiController
         );
     }
 
-    #[Route('/{id}', methods:['DELETE'], name: 'app_user_delete')]
+    #[Route('/{id}', name: 'app_user_delete', methods: ['DELETE'])]
     public function delete(
         int $id
     ) : JsonResponse {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
 
         $this->userManager->delete(
-            $this->userManager->get($id) 
+            $this->userManager->get($id)
         );
 
         return $this->json(null,204);

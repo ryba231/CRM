@@ -11,7 +11,6 @@ use App\Mapper\Workspace\WorkspaceUserMapper;
 use App\Service\Workspace\WorkspaceManager;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
@@ -106,7 +105,7 @@ final class WorkspaceController extends BaseApiController
         }
 
         $this->workspaceManager->update(
-            $workspace, 
+            $workspace,
             $dto
         );
 
@@ -120,9 +119,9 @@ final class WorkspaceController extends BaseApiController
         int $id
     ) : JsonResponse {
         $workspace = $this->workspaceManager->get($id);
-        
+
         $this->workspaceManager->delete($workspace);
-        
+
         return $this->json(null, 204);
     }
 
@@ -133,8 +132,6 @@ final class WorkspaceController extends BaseApiController
         ValidatorInterface $validator
     ) : JsonResponse{
         $workspace = $this->workspaceManager->get($id);
-
-        if(!$workspace) throw new NotFoundHttpException('Workspace not found');
 
         $data = json_decode($request->getContent(), true);
         $dto = new AddUserToWorkspaceDTO();

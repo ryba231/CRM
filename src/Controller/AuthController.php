@@ -13,7 +13,7 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 #[Route('/api/v1')]
 class AuthController extends BaseApiController
 {
-    #[Route('/register', methods:['POST'], name: 'app_register')]
+    #[Route('/register', name: 'app_register', methods:['POST'])]
     public function register(
         Request $request,
         ValidatorInterface $validator,
@@ -47,7 +47,7 @@ class AuthController extends BaseApiController
         ], 201);
     }
 
-    #[Route('/login', methods:['POST'], name: 'app_login')]
+    #[Route('/login', name: 'app_login', methods:['POST'])]
     public function login()
     {}
 }
