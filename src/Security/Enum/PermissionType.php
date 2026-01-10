@@ -14,4 +14,8 @@ enum PermissionType: string
     case USER_EDIT = 'user.edit';
 
     case WORKSPACE_MANAGE = 'workspace.manage';
+    case WORKSPACE_VIEW = 'workspace.view';
+    case WORKSPACE_CREATE = 'workspace.create';
+    case WORKSPACE_EDIT = 'workspace.edit';
+    case WORKSPACE_DELETE = 'workspace.delete';
 }
