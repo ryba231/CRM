@@ -9,6 +9,7 @@ use App\Entity\Workspace\WorkspaceUser;
 use App\Mapper\Workspace\WorkspaceMapper;
 use App\Mapper\Workspace\WorkspaceUserMapper;
 use App\Security\Enum\PermissionType;
+use App\Service\Workspace\WorkspaceDeletionService;
 use App\Service\Workspace\WorkspaceManager;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -116,15 +117,13 @@ final class WorkspaceController extends BaseApiController
     }
     #[Route('/{id}', name: 'app_workspace_delete', methods: ['DELETE'])]
     public function delete(
-        int $id
+        int $id,
+        WorkspaceDeletionService $service
     ) : JsonResponse {
-        $workspace = $this->workspaceManager->getByIdAndUser($id, $this->getUser());
+        
+        $workspace = $this->workspaceManager->getDeletableForUser($id,$this->getUser());
 
-        $this->denyAccessUnlessGranted(
-            PermissionType::WORKSPACE_MANAGE->value
-        );
-
-        $this->workspaceManager->delete($workspace);
+        $service->delete($workspace);
 
         return $this->json(null, 204);
     }

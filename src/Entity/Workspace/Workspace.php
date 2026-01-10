@@ -38,6 +38,9 @@ class Workspace
     #[ORM\Column(type: 'datetime_immutable')]
     private ?\DateTimeImmutable $updated_at = null;
 
+    #[ORM\Column(nullable: true, type: 'datetime_immutable')]
+    private ?\DateTimeImmutable $deleted_at = null;
+
     public function __construct()
     {
         $this->contacts = new ArrayCollection();
@@ -142,5 +145,27 @@ class Workspace
     public function setUpdatedAt(): void
     {
          $this->updated_at = new \DateTimeImmutable();
+    }
+
+    public function getDeletedAt(): ?\DateTimeImmutable
+    {
+        return $this->deleted_at;
+    }
+
+    public function setDeletedAt(?\DateTimeImmutable $deleted_at): static
+    {
+        $this->deleted_at = $deleted_at;
+
+        return $this;
+    }
+
+    public function softDelete(): void 
+    {
+        $this->deleted_at = new \DateTimeImmutable();    
+    }
+
+    public function isDeleted(): bool
+    {
+        return $this->deleted_at !== null;
     }
 }

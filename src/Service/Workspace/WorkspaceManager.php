@@ -10,6 +10,7 @@ use App\Entity\Workspace\WorkspaceUser;
 use App\Repository\Workspace\WorkspaceRepository;
 use App\Repository\Workspace\WorkspaceUserRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 final class WorkspaceManager {
     public function __construct(
@@ -63,13 +64,6 @@ final class WorkspaceManager {
         return $workspace;
     }
 
-    public function delete(
-        Workspace $workspace
-    ) : void {
-        $this->entityManager->remove($workspace);
-        $this->entityManager->flush();
-    }
-
     public function addUser(
         Workspace $workspace,
         AddUserToWorkspaceDTO $dto
@@ -105,6 +99,17 @@ final class WorkspaceManager {
         $workspace = $this->workspaceRepository->findOrFail($workspaceId);
 
         $this->workspaceUserRepository->findByWorkspaceAndUser($workspace, $user);
+
+        return $workspace;
+    }
+
+    public function getDeletableForUser(
+        int $workspaceId,
+        User $user
+    ): ?Workspace  {
+        $workspace = $this->workspaceRepository->findDeletableForUser($workspaceId, $user);
+
+        if(!$workspace) throw new NotFoundHttpException('Workspace not found');
 
         return $workspace;
     }

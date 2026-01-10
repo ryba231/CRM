@@ -2,6 +2,7 @@
 
 namespace App\Repository\Workspace;
 
+use App\Entity\User\User;
 use App\Entity\Workspace\Workspace;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -23,6 +24,23 @@ class WorkspaceRepository extends ServiceEntityRepository
         if(!$workspace) throw new NotFoundHttpException('Workspace not found');
 
         return $workspace;
+    }
+
+    public function findDeletableForUser(
+        int $workspaceId,
+        User $user
+    ) : ?Workspace {
+        return $this->createQueryBuilder('w')
+            ->join('w.memberships', 'wu')
+            ->andWhere('wu.user = :user')
+            ->andWhere('wu.role = :role')
+            ->andWhere('w.id = :id')
+            ->andWhere('w.deleted_at IS NULL')
+            ->setParameter('user', $user)
+            ->setParameter('role', 'owner')
+            ->setParameter('id', $workspaceId)
+            ->getQuery()
+            ->getOneOrNullResult();
     }
 
     //    /**
