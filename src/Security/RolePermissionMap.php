@@ -19,12 +19,18 @@ final class RolePermissionMap
                 PermissionType::CONTACT_DELETE,
                 PermissionType::USER_VIEW,
                 PermissionType::USER_EDIT,
+                PermissionType::USER_INVITE,
+                PermissionType::WORKSPACE_CREATE,
+                PermissionType::WORKSPACE_DELETE,
+                PermissionType::WORKSPACE_EDIT,
+                PermissionType::WORKSPACE_VIEW
             ],
 
             WorkspaceRoleType::MEMBER => [
                 PermissionType::CONTACT_VIEW,
                 PermissionType::CONTACT_CREATE,
                 PermissionType::CONTACT_EDIT,
+                PermissionType::WORKSPACE_VIEW
             ]
         };
     }

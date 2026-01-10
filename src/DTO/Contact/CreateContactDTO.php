@@ -22,6 +22,7 @@ final class CreateContactDTO
     #[Assert\Choice(choices: ['new', 'prospect', 'customer', 'inactive'])]
     public ?string $status = 'new';
 
+    #[Assert\NotBlank]
     #[Assert\Choice(choices: ['lead', 'referral', 'marketing'], message: 'Invalid contact type')]
-    public ?string $type = null;
+    public ?string $type;
 }

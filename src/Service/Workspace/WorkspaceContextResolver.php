@@ -7,10 +7,11 @@ use App\Entity\Workspace\Workspace;
 use App\Entity\Workspace\WorkspaceUser;
 use App\Repository\Workspace\WorkspaceUserRepository;
 
+
 final readonly class WorkspaceContextResolver
 {
     public function __construct(
-        private WorkspaceUserRepository $workspaceUserRepository,
+        private WorkspaceUserRepository $workspaceUserRepository
     ) {}
 
     public function resolve(

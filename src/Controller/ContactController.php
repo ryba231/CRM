@@ -9,7 +9,7 @@ use App\Entity\User\User;
 use App\Mapper\Contact\ContactMapper;
 use App\Security\Enum\PermissionType;
 use App\Service\Contact\ContactManager;
-use App\Service\Workspace\WorkspaceManager;
+use App\Service\Workspace\WorkspaceContextInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
@@ -21,21 +21,16 @@ final class ContactController extends BaseApiController
 
     public function __construct(
         private ContactManager $contactManager,
-        private WorkspaceManager $workspaceManager
+        private WorkspaceContextInterface $workspaceContext
         ){}
     #[Route(name: 'app_contact_list', methods: ['GET'])]
     public function list(
         Request $request
     ): JsonResponse {
-        $workspaceId = (int) $request->headers->get('X-Workspace-Id');
-
-        if(!$workspaceId) throw new \DomainException('Workspace header missing');
-
-        $workspace = $this->workspaceManager->getCurrentWorkspace($workspaceId, $this->getUser());
+        $workspace = $this->workspaceContext->getCurrentWorkspace();
 
         $this->denyAccessUnlessGranted(
-            PermissionType::CONTACT_VIEW->value,
-            $workspace
+            PermissionType::CONTACT_VIEW->value
         );
 
         $page = max(1, $request->query->getInt('page', 1));
@@ -64,15 +59,10 @@ final class ContactController extends BaseApiController
         Request $request,
         ValidatorInterface $validator
     ): JsonResponse {
-        $workspaceId = (int) $request->headers->get('X-Workspace-Id');
-
-        if(!$workspaceId) throw new \DomainException('Workspace header missing');
-
-        $workspace = $this->workspaceManager->getCurrentWorkspace($workspaceId, $this->getUser());
+        $workspace = $this->workspaceContext->getCurrentWorkspace();
 
         $this->denyAccessUnlessGranted(
-            PermissionType::CONTACT_CREATE->value,
-            $workspace
+            PermissionType::CONTACT_CREATE->value
         );
 
         $data = json_decode($request->getContent(), true);
@@ -109,8 +99,7 @@ final class ContactController extends BaseApiController
         $contact = $this->contactManager->get($id);
 
         $this->denyAccessUnlessGranted(
-            PermissionType::CONTACT_VIEW->value,
-            $contact
+            PermissionType::CONTACT_VIEW->value
         );
 
         return $this->json(
@@ -127,8 +116,7 @@ final class ContactController extends BaseApiController
         $contact = $this->contactManager->get($id);
 
         $this->denyAccessUnlessGranted(
-            PermissionType::CONTACT_EDIT->value,
-            $contact
+            PermissionType::CONTACT_EDIT->value
         );
 
         $data = json_decode($request->getContent(), true);
@@ -164,8 +152,7 @@ final class ContactController extends BaseApiController
         $contact = $this->contactManager->get($id);
 
         $this->denyAccessUnlessGranted(
-            PermissionType::CONTACT_DELETE->value,
-            $contact
+            PermissionType::CONTACT_DELETE->value
         );
 
         $this->contactManager->delete($contact);

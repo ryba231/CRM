@@ -45,8 +45,7 @@ final class WorkspaceController extends BaseApiController
                     'total' => $result['total'],
                     'pages' => (int) ceil($result['total'] / $limit),
                 ]
-            ],
-            200
+            ]
         );
     }
 
@@ -80,12 +79,8 @@ final class WorkspaceController extends BaseApiController
     public function show(
         int $id
     ) : JsonResponse {
-        $workspace = $this->workspaceManager->get($id);
-
-        $this->denyAccessUnlessGranted(
-            PermissionType::WORKSPACE_MANAGE->value,
-            $workspace
-        );
+        $workspace = $this->workspaceManager->getByIdAndUser($id, $this->getUser());
+        
 
         return $this->json(
             WorkspaceMapper::toDTO($workspace)
@@ -98,12 +93,7 @@ final class WorkspaceController extends BaseApiController
         Request $request,
         ValidatorInterface $validator
     ) : JsonResponse {
-        $workspace = $this->workspaceManager->get($id);
-
-        $this->denyAccessUnlessGranted(
-            PermissionType::WORKSPACE_MANAGE->value,
-            $workspace
-        );
+        $workspace = $this->workspaceManager->getByIdAndUser($id, $this->getUser());
 
         $data = json_decode($request->getContent(), true);
         $dto = new UpdateWorkspaceDTO();
@@ -121,19 +111,17 @@ final class WorkspaceController extends BaseApiController
         );
 
         return $this->json(
-            WorkspaceMapper::toDTO($workspace),
-            200
+            WorkspaceMapper::toDTO($workspace)
         );
     }
     #[Route('/{id}', name: 'app_workspace_delete', methods: ['DELETE'])]
     public function delete(
         int $id
     ) : JsonResponse {
-        $workspace = $this->workspaceManager->get($id);
+        $workspace = $this->workspaceManager->getByIdAndUser($id, $this->getUser());
 
         $this->denyAccessUnlessGranted(
-            PermissionType::WORKSPACE_MANAGE->value,
-            $workspace
+            PermissionType::WORKSPACE_MANAGE->value
         );
 
         $this->workspaceManager->delete($workspace);
@@ -150,8 +138,7 @@ final class WorkspaceController extends BaseApiController
         $workspace = $this->workspaceManager->get($id);
 
         $this->denyAccessUnlessGranted(
-            PermissionType::USER_INVITE->value,
-            $workspace
+            PermissionType::USER_INVITE->value
         );
 
         $data = json_decode($request->getContent(), true);

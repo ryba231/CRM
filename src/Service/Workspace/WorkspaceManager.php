@@ -97,4 +97,15 @@ final class WorkspaceManager {
 
         return $workspace;
     }
+
+    public function getByIdAndUser(
+        int $workspaceId,
+        User $user
+    ) : Workspace {
+        $workspace = $this->workspaceRepository->findOrFail($workspaceId);
+
+        $this->workspaceUserRepository->findByWorkspaceAndUser($workspace, $user);
+
+        return $workspace;
+    }
 }
