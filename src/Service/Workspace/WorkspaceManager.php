@@ -7,16 +7,19 @@ use App\DTO\Workspace\UpdateWorkspaceDTO;
 use App\Entity\User\User;
 use App\Entity\Workspace\Workspace;
 use App\Entity\Workspace\WorkspaceUser;
+use App\Event\WorkspaceCreatedEvent;
 use App\Repository\Workspace\WorkspaceRepository;
 use App\Repository\Workspace\WorkspaceUserRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 final class WorkspaceManager {
     public function __construct(
         private EntityManagerInterface $entityManager,
         private WorkspaceRepository $workspaceRepository,
-        private WorkspaceUserRepository $workspaceUserRepository)
+        private WorkspaceUserRepository $workspaceUserRepository,
+        private EventDispatcherInterface $dispatcher)
     {}
 
     public function createWorkspace(
@@ -36,6 +39,7 @@ final class WorkspaceManager {
         $this->entityManager->persist($workspaceUser);
         $this->entityManager->flush();
 
+        $this->dispatcher->dispatch(new WorkspaceCreatedEvent($workspace, $owner), 'workspace.created');
         return $workspace;
     }
 
