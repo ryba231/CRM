@@ -137,7 +137,8 @@ final class ContactController extends BaseApiController
 
         $this->contactManager->update(
             $contact,
-            $dto
+            $dto,
+            $this->getUser()
         );
 
         return $this->json(
@@ -155,7 +156,7 @@ final class ContactController extends BaseApiController
             PermissionType::CONTACT_DELETE->value
         );
 
-        $this->contactManager->delete($contact);
+        $this->contactManager->delete($contact, $this->getUser());
 
         return $this->json(null, 204);
     }

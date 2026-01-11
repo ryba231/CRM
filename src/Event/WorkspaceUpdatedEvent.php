@@ -8,6 +8,7 @@ final readonly class WorkspaceUpdatedEvent
 {
     public function __construct(
         public readonly Workspace $workspace,
-        public readonly User $user
+        public readonly User $actor,
+        public readonly array $changes
     ) {}
 }

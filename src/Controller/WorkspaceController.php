@@ -108,7 +108,8 @@ final class WorkspaceController extends BaseApiController
 
         $this->workspaceManager->update(
             $workspace,
-            $dto
+            $dto,
+            $this->getUser()
         );
 
         return $this->json(
@@ -123,7 +124,7 @@ final class WorkspaceController extends BaseApiController
         
         $workspace = $this->workspaceManager->getDeletableForUser($id,$this->getUser());
 
-        $service->delete($workspace);
+        $service->delete($workspace, $this->getUser());
 
         return $this->json(null, 204);
     }

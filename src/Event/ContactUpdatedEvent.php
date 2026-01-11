@@ -8,6 +8,7 @@ final readonly class ContactUpdatedEvent
 {
     public function __construct(
         public readonly Contact $contact,
-        public readonly User $user
+        public readonly User $actor,
+        public readonly array $changes
     ){}
 }

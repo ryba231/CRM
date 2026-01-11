@@ -10,7 +10,7 @@ class WorkspaceUserMapper
         WorkspaceUser $workspaceUser
     ) : ResponseListWorkspaceDTO {
         return new ResponseListWorkspaceDTO(
-            $workspaceUser->getId(),
+            $workspaceUser->getWorkspace()->getId(),
             $workspaceUser->getWorkspace()->getName(),
             $workspaceUser->getRole()->value,
             $workspaceUser->getWorkspace()->getCreatedAt()->format('Y-m-d H:i:s'),

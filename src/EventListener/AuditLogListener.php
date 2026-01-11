@@ -18,12 +18,7 @@ final class AuditLogListener
     )
     {}
 
-    #[AsEventListener(event: 'kernel.event_listener')]
-    public function onKernelEventListener($event): void
-    {
-        // ...
-    }
-
+    #[AsEventListener(event: 'contact.created')]
     public function onContactCreated(
         ContactCreatedEvent $event
     ) : void {
@@ -32,10 +27,11 @@ final class AuditLogListener
             entityId: $event->contact->getId(),
             action: 'create',
             changes: null,
-            userId: $event->user->getId()
+            userId: $event->actor->getId()
         );
     }
 
+    #[AsEventListener(event: 'contact.updated')]
     public function onContactUpdated(
         ContactUpdatedEvent $event
     ) : void {
@@ -43,11 +39,12 @@ final class AuditLogListener
             entity: 'Contact',
             entityId: $event->contact->getId(),
             action: 'update',
-            changes: null,
-            userId: $event->user->getId()
+            changes: $event->changes,
+            userId: $event->actor->getId()
         );
     }
 
+    #[AsEventListener(event: 'contact.deleted')]
     public function onContactDeleted(
         ContactDeletedEvent $event
     ) : void {
@@ -56,10 +53,11 @@ final class AuditLogListener
             entityId: $event->contact->getId(),
             action: 'delete',
             changes: null,
-            userId: $event->user->getId()
+            userId: $event->actor->getId()
         );
     }
 
+    #[AsEventListener(event: 'workspace.created')]
     public function onWorkspaceCreated(
         WorkspaceCreatedEvent $event
     ) : void {
@@ -68,10 +66,11 @@ final class AuditLogListener
             entityId: $event->workspace->getId(),
             action: 'create',
             changes: null,
-            userId: $event->user->getId()
+            userId: $event->actor->getId()
         );
     }
 
+    #[AsEventListener(event: 'workspace.updated')]
     public function onWorkspaceUpdated(
         WorkspaceUpdatedEvent $event
     ) : void {
@@ -79,11 +78,12 @@ final class AuditLogListener
             entity: 'Workspace',
             entityId: $event->workspace->getId(),
             action: 'update',
-            changes: null,
-            userId: $event->user->getId()
+            changes: $event->changes,
+            userId: $event->actor->getId()
         );
     }
 
+    #[AsEventListener(event: 'workspace.deleted')]
     public function onWorkspaceDeleted(
         WorkspaceDeletedEvent $event
     ) : void {
@@ -92,7 +92,7 @@ final class AuditLogListener
             entityId: $event->workspace->getId(),
             action: 'delete',
             changes: null,
-            userId: $event->user->getId()
+            userId: $event->actor->getId()
         );
     }
 

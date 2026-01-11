@@ -8,6 +8,6 @@ final readonly class ContactDeletedEvent
 {
     public function __construct(
         public readonly Contact $contact,
-        public readonly User $user
+        public readonly User $actor
     ){}
 }

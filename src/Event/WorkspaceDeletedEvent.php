@@ -8,6 +8,6 @@ final readonly class WorkspaceDeletedEvent
 {
     public function __construct(
         public readonly Workspace $workspace,
-        public readonly User $user
+        public readonly User $actor
     ) {}
 }

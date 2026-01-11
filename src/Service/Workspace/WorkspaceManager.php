@@ -8,8 +8,10 @@ use App\Entity\User\User;
 use App\Entity\Workspace\Workspace;
 use App\Entity\Workspace\WorkspaceUser;
 use App\Event\WorkspaceCreatedEvent;
+use App\Event\WorkspaceUpdatedEvent;
 use App\Repository\Workspace\WorkspaceRepository;
 use App\Repository\Workspace\WorkspaceUserRepository;
+use App\Service\AuditLog\ChangeSetComparator;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -19,7 +21,8 @@ final class WorkspaceManager {
         private EntityManagerInterface $entityManager,
         private WorkspaceRepository $workspaceRepository,
         private WorkspaceUserRepository $workspaceUserRepository,
-        private EventDispatcherInterface $dispatcher)
+        private EventDispatcherInterface $dispatcher,
+        private ChangeSetComparator $changeSetComparator)
     {}
 
     public function createWorkspace(
@@ -59,11 +62,20 @@ final class WorkspaceManager {
 
     public function update(
         Workspace $workspace,
-        UpdateWorkspaceDTO $dto
+        UpdateWorkspaceDTO $dto,
+        User $actor
     ) : Workspace {
+        $before = $this->auditLogData($workspace);
+
         if($dto->name) $workspace->setName($dto->name);
 
+        $changes = $this->changeSetComparator->diff($before, $this->auditLogData($workspace));
+
         $this->entityManager->flush();
+
+        if($changes !== []){
+            $this->dispatcher->dispatch(new WorkspaceUpdatedEvent($workspace, $actor, $changes), 'workspace.updated');
+        }
 
         return $workspace;
     }
@@ -116,5 +128,13 @@ final class WorkspaceManager {
         if(!$workspace) throw new NotFoundHttpException('Workspace not found');
 
         return $workspace;
+    }
+
+    private function auditLogData(
+        Workspace $workspace
+    ): array {
+        return [
+            'name' => $workspace->getName()
+        ];
     }
 }
