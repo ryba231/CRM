@@ -12,6 +12,7 @@ enum PermissionType: string
     case USER_VIEW = 'user.view';
     case USER_INVITE = 'user.invite';
     case USER_EDIT = 'user.edit';
+    case USER_DELETE = 'user.delete';
 
     case WORKSPACE_MANAGE = 'workspace.manage';
     case WORKSPACE_VIEW = 'workspace.view';

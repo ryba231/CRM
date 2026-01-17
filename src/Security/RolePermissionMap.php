@@ -20,6 +20,7 @@ final class RolePermissionMap
                 PermissionType::USER_VIEW,
                 PermissionType::USER_EDIT,
                 PermissionType::USER_INVITE,
+                PermissionType::USER_DELETE,
                 PermissionType::WORKSPACE_CREATE,
                 PermissionType::WORKSPACE_DELETE,
                 PermissionType::WORKSPACE_EDIT,

@@ -3,10 +3,12 @@ namespace App\Service\Workspace;
 
 use App\DTO\Workspace\AddUserToWorkspaceDTO;
 use App\DTO\Workspace\CreateWorkspaceDTO;
+use App\DTO\Workspace\UpdateUserInWorkspaceDTO;
 use App\DTO\Workspace\UpdateWorkspaceDTO;
 use App\Entity\User\User;
 use App\Entity\Workspace\Workspace;
 use App\Entity\Workspace\WorkspaceUser;
+use App\Event\WorkspaceAddedUserEvent;
 use App\Event\WorkspaceCreatedEvent;
 use App\Event\WorkspaceUpdatedEvent;
 use App\Repository\Workspace\WorkspaceRepository;
@@ -80,11 +82,20 @@ final class WorkspaceManager {
         return $workspace;
     }
 
+    public function getAllUser(
+        int $page,
+        int $limit,
+        Workspace $workspace
+    ) : array {
+        return $this->workspaceUserRepository->findByWorkspace($page, $limit, $workspace);
+    }
+
     public function addUser(
         Workspace $workspace,
-        AddUserToWorkspaceDTO $dto
+        AddUserToWorkspaceDTO $dto,
+        User $actor
     ) : void {
-        $user = $this->entityManager->getRepository(User::class)->find($dto->userId);
+        $user = $this->entityManager->getRepository(User::class)->findOneBy(['email' => $dto->email]);
 
         if(!$user) throw new \DomainException('User not found');
 
@@ -95,6 +106,10 @@ final class WorkspaceManager {
 
         $this->entityManager->persist($workspaceUser);
         $this->entityManager->flush();
+
+        $changes = $this->manageUserAuditLogData($workspace, $workspaceUser);
+
+        $this->dispatcher->dispatch(new WorkspaceAddedUserEvent($workspace, $actor, $changes), 'workspace.user.added');
     }
 
     public function getCurrentWorkspace(
@@ -135,6 +150,17 @@ final class WorkspaceManager {
     ): array {
         return [
             'name' => $workspace->getName()
+        ];
+    }
+
+    private function manageUserAuditLogData(
+        Workspace $workspace,
+        WorkspaceUser $workspaceUser
+    ): array {
+        return [
+            'name' => $workspace->getName(),
+            'email' => $workspaceUser->getUser()->getEmail(),
+            'role' => $workspaceUser->getRole()
         ];
     }
 }

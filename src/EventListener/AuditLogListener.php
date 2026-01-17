@@ -5,9 +5,13 @@ namespace App\EventListener;
 use App\Event\ContactCreatedEvent;
 use App\Event\ContactDeletedEvent;
 use App\Event\ContactUpdatedEvent;
+use App\Event\Enum\AuditAction;
 use App\Event\WorkspaceCreatedEvent;
 use App\Event\WorkspaceDeletedEvent;
 use App\Event\WorkspaceUpdatedEvent;
+use App\Event\WorkspaceAddedUserEvent;
+use App\Event\WorkspaceDeletedUserEvent;
+use App\Event\WorkspaceRoleChangedUserEvent;
 use App\Service\AuditLog\AuditLogManager;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
@@ -25,7 +29,7 @@ final class AuditLogListener
         $this->auditLogManager->log(
             entity: 'Contact',
             entityId: $event->contact->getId(),
-            action: 'create',
+            action: AuditAction::CREATE->value,
             changes: null,
             userId: $event->actor->getId()
         );
@@ -38,7 +42,7 @@ final class AuditLogListener
         $this->auditLogManager->log(
             entity: 'Contact',
             entityId: $event->contact->getId(),
-            action: 'update',
+            action: AuditAction::UPDATE->value,
             changes: $event->changes,
             userId: $event->actor->getId()
         );
@@ -51,7 +55,7 @@ final class AuditLogListener
         $this->auditLogManager->log(
             entity: 'Contact',
             entityId: $event->contact->getId(),
-            action: 'delete',
+            action: AuditAction::DELETE->value,
             changes: null,
             userId: $event->actor->getId()
         );
@@ -64,7 +68,7 @@ final class AuditLogListener
         $this->auditLogManager->log(
             entity: 'Workspace',
             entityId: $event->workspace->getId(),
-            action: 'create',
+            action: AuditAction::CREATE->value,
             changes: null,
             userId: $event->actor->getId()
         );
@@ -77,7 +81,7 @@ final class AuditLogListener
         $this->auditLogManager->log(
             entity: 'Workspace',
             entityId: $event->workspace->getId(),
-            action: 'update',
+            action: AuditAction::UPDATE->value,
             changes: $event->changes,
             userId: $event->actor->getId()
         );
@@ -90,10 +94,49 @@ final class AuditLogListener
         $this->auditLogManager->log(
             entity: 'Workspace',
             entityId: $event->workspace->getId(),
-            action: 'delete',
+            action: AuditAction::DELETE->value,
             changes: null,
             userId: $event->actor->getId()
         );
+    }
+
+    #[AsEventListener(event: 'workspace.user.added')]
+    public function onWorkspaceUserAdded(
+        WorkspaceAddedUserEvent $event
+    ) : void {
+        $this->auditLogManager->log(
+            entity: 'Workspace',
+            entityId: $event->workspace->getId(),
+            action: AuditAction::USER_ADDED->value,
+            changes: $event->changes,
+            userId: $event->actor->getId()
+        );    
+    }
+
+    #[AsEventListener(event: 'workspace.user.deleted')]
+    public function onWorkspaceUserDeleted(
+        WorkspaceDeletedUserEvent $event
+    ) : void {
+        $this->auditLogManager->log(
+            entity: 'Workspace',
+            entityId: $event->workspaceUser->getId(),
+            action: AuditAction::USER_DELETED->value,
+            changes: $event->changes,
+            userId: $event->actor->getId()
+        );    
+    }
+
+    #[AsEventListener(event: 'workspace.user.role_changed')]
+    public function onWorkspaceUserRoleChanged(
+        WorkspaceRoleChangedUserEvent $event
+    ) : void {
+        $this->auditLogManager->log(
+            entity: 'WorkspaceUser',
+            entityId: $event->workspaceUser->getId(),
+            action: AuditAction::USER_ROLE_CHANGED->value,
+            changes: $event->changes,
+            userId: $event->actor->getId()
+        );    
     }
 
 

@@ -2,13 +2,11 @@
 
 namespace App\Controller;
 
-use App\DTO\Workspace\AddUserToWorkspaceDTO;
 use App\DTO\Workspace\CreateWorkspaceDTO;
 use App\DTO\Workspace\UpdateWorkspaceDTO;
 use App\Entity\Workspace\WorkspaceUser;
 use App\Mapper\Workspace\WorkspaceMapper;
 use App\Mapper\Workspace\WorkspaceUserMapper;
-use App\Security\Enum\PermissionType;
 use App\Service\Workspace\WorkspaceDeletionService;
 use App\Service\Workspace\WorkspaceManager;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -19,8 +17,9 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 #[Route('/api/v1/workspace')]
 final class WorkspaceController extends BaseApiController
 {
-    public function __construct(private WorkspaceManager $workspaceManager)
-    {}
+    public function __construct(
+        private WorkspaceManager $workspaceManager,
+    ) {}
 
     #[Route(name: 'app_workspace_list', methods: ['GET'])]
     public function list(
@@ -33,7 +32,7 @@ final class WorkspaceController extends BaseApiController
         $result = $this->workspaceManager->getAllWorkspace($page, $limit, $owner);
 
         $workspaceDto = array_map(
-            fn(WorkspaceUser $workspaceUser) => WorkspaceUserMapper::toDTO($workspaceUser),
+            fn(WorkspaceUser $workspaceUser) => WorkspaceUserMapper::workspaceToDTO($workspaceUser),
             $result['items']
         );
 
@@ -125,34 +124,6 @@ final class WorkspaceController extends BaseApiController
         $workspace = $this->workspaceManager->getDeletableForUser($id,$this->getUser());
 
         $service->delete($workspace, $this->getUser());
-
-        return $this->json(null, 204);
-    }
-
-    #[Route('/{id}/user', name: 'app_workspace_add_user', methods: ['POST'])]
-    public function addUser(
-        int $id,
-        Request $request,
-        ValidatorInterface $validator
-    ) : JsonResponse{
-        $workspace = $this->workspaceManager->get($id);
-
-        $this->denyAccessUnlessGranted(
-            PermissionType::USER_INVITE->value
-        );
-
-        $data = json_decode($request->getContent(), true);
-        $dto = new AddUserToWorkspaceDTO();
-        $dto->userId = $data['userId'] ?? null;
-        $dto->role = $data['role'] ?? null;
-
-        $errors = $validator->validate($dto);
-
-        if(count($errors) > 0) {
-            return $this->validationErrorResponse($errors);
-        }
-
-        $this->workspaceManager->addUser($workspace, $dto);
 
         return $this->json(null, 204);
     }

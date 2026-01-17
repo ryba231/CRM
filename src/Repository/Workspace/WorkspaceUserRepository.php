@@ -20,6 +20,15 @@ class WorkspaceUserRepository extends ServiceEntityRepository
         parent::__construct($registry, WorkspaceUser::class);
     }
 
+    public function findOrFail(
+        int $id
+    ): WorkspaceUser {
+        $workspaceUser = $this->find($id);
+        if(!$workspaceUser) throw new NotFoundHttpException('Workspace user not found');
+
+        return $workspaceUser;
+    }
+
     public function findByWorkspaceAndUser(
         Workspace $workspace,
         User $user
@@ -48,6 +57,27 @@ class WorkspaceUserRepository extends ServiceEntityRepository
             ->setMaxResults($limit)
             ->setParameter('user', $user);
 
+        $paginator = new Paginator($qb);
+        $total = count($paginator);
+
+        return [
+            'items' => iterator_to_array($paginator),
+            'total' => $total
+        ];
+    }
+
+    public function findByWorkspace(
+        int $page,
+        int $limit,
+        Workspace $workspace
+    ) : array {
+        $qb = $this->createQueryBuilder('wu')
+            ->join('wu.user', 'u')
+            ->andWhere('wu.workspace = :workspace')
+            ->setFirstResult(($page - 1) * $limit)
+            ->setMaxResults($limit)
+            ->setParameter('workspace', $workspace);
+            
         $paginator = new Paginator($qb);
         $total = count($paginator);
 
