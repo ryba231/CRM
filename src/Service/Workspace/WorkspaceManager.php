@@ -57,9 +57,10 @@ final class WorkspaceManager {
     public function getAllWorkspace(
         int $page,
         int $limit,
-        User $owner
+        User $owner,
+        bool $includeDeleted
     ) : array {
-        return $this->workspaceUserRepository->findByUserPaginated($page, $limit, $owner);
+        return $this->workspaceUserRepository->findByUserPaginated($page, $limit, $owner, $includeDeleted);
     }
 
     public function update(

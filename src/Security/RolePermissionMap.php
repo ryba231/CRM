@@ -17,6 +17,7 @@ final class RolePermissionMap
                 PermissionType::CONTACT_CREATE,
                 PermissionType::CONTACT_EDIT,
                 PermissionType::CONTACT_DELETE,
+                PermissionType::CONTACT_RESTORE,
                 PermissionType::USER_VIEW,
                 PermissionType::USER_EDIT,
                 PermissionType::USER_INVITE,

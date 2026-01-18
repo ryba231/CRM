@@ -57,11 +57,16 @@ class ContactRepository extends ServiceEntityRepository
         Workspace $workspace,
         int $page,
         int $limit,
-        ?string $search
+        ?string $search,
+        ?bool $includeDeleted = false
     ) : array {
         $qb = $this->createQueryBuilder('c')
             ->andWhere('c.workspace = :workspace')
             ->setParameter('workspace', $workspace);
+
+        if(!$includeDeleted) {
+            $qb->andWhere('c.deleted_at IS NULL');
+        }
 
         if($search) {
             $qb->andWhere('(c.first_name LIKE :s OR c.last_name LIKE :s)')
@@ -78,6 +83,17 @@ class ContactRepository extends ServiceEntityRepository
             'items' => iterator_to_array($paginator),
             'total' => $total
         ];
+    }
+
+    public function findExpiredSoftDeleted(
+        \DateTimeImmutable $before
+    ) : array {
+        return $this->createQueryBuilder('c')
+            ->andWhere('c.deleted_at IS NOT NULL')
+            ->andWhere('c.deleted_at < :before')
+            ->setParameter('before', $before)
+            ->getQuery()
+            ->getResult();
     }
 
     //    /**

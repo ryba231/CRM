@@ -52,6 +52,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: WorkspaceUser::class, mappedBy: 'user')]
     private Collection $workspaceMemberships;
 
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    private ?\DateTimeImmutable $deleted_at = null;
+
     public function __construct()
     {
         $this->contacts = new ArrayCollection();
@@ -206,5 +209,29 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         }
 
         return $this;
+    }
+
+    public function getDeletedAt(): ?\DateTimeImmutable
+    {
+        return $this->deleted_at;
+    }
+
+    public function setDeletedAt(?\DateTimeImmutable $deleted_at): static
+    {
+        $this->deleted_at = $deleted_at;
+
+        return $this;
+    }
+
+    public function softDelete() : void {
+        $this->deleted_at = new \DateTimeImmutable();
+    }
+
+    public function restore() : void {
+        $this->deleted_at = null;
+    }
+
+    public function isDeleted() : bool {
+        return $this->deleted_at !== null;
     }
 }

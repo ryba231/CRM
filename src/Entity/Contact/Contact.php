@@ -54,6 +54,9 @@ class Contact
     #[ORM\JoinColumn(nullable: false)]
     private ?Workspace $workspace = null;
 
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    private ?\DateTimeImmutable $deleted_at = null;
+
     public function getFullName() : ?string 
     {
         return trim(($this->first_name ?? '') . ' ' . ($this->last_name ?? ''));    
@@ -205,5 +208,29 @@ class Contact
         $this->workspace = $workspace;
 
         return $this;
+    }
+
+    public function getDeletedAt(): ?\DateTimeImmutable
+    {
+        return $this->deleted_at;
+    }
+
+    public function setDeletedAt(?\DateTimeImmutable $deleted_at): static
+    {
+        $this->deleted_at = $deleted_at;
+
+        return $this;
+    }
+
+    public function softDelete() : void {
+        $this->deleted_at = new \DateTimeImmutable();
+    }
+
+    public function restore() : void {
+        $this->deleted_at = null;
+    }
+
+    public function isDeleted() : bool {
+        return $this->deleted_at !== null;
     }
 }

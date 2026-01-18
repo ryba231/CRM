@@ -14,7 +14,8 @@ class UserMapper
             $user->getFirstName(),
             $user->getLastName(),
             $user->getRoles(),
-            $user->getCreatedAt()->format('Y-m-d H:i:s')
+            $user->getCreatedAt()->format('Y-m-d H:i:s'),
+            $user->getDeletedAt()?->format('Y-m-d H:i:s')
         );
     }
 }

@@ -92,11 +92,4 @@ final class UserManager
 
         return $user;
     }
-
-    public function delete(
-       User $user
-    ): void {
-        $this->entityManager->remove($user);
-        $this->entityManager->flush();
-    }
 }

@@ -8,7 +8,9 @@ use App\Entity\Contact\Contact;
 use App\Entity\User\User;
 use App\Mapper\Contact\ContactMapper;
 use App\Security\Enum\PermissionType;
+use App\Service\Contact\ContactDeleter;
 use App\Service\Contact\ContactManager;
+use App\Service\Contact\ContactRestorer;
 use App\Service\Workspace\WorkspaceContextInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -21,6 +23,8 @@ final class ContactController extends BaseApiController
 
     public function __construct(
         private ContactManager $contactManager,
+        private ContactDeleter $deleter,
+        private ContactRestorer $restorer,
         private WorkspaceContextInterface $workspaceContext
         ){}
     #[Route(name: 'app_contact_list', methods: ['GET'])]
@@ -35,8 +39,9 @@ final class ContactController extends BaseApiController
 
         $page = max(1, $request->query->getInt('page', 1));
         $limit = min(50, max(1, $request->query->getInt('limit', 10)));
+        $includeDeleted = $request->query->getBoolean('includeDeleted');
 
-        $result = $this->contactManager->getAllContactByWorkspace($workspace, $page, $limit, null);
+        $result = $this->contactManager->getAllContactByWorkspace($workspace, $page, $limit, null, $includeDeleted);
         $contactsDto = array_map(
             fn(Contact $contact) => ContactMapper::toDTO($contact),
             $result['items']
@@ -156,8 +161,25 @@ final class ContactController extends BaseApiController
             PermissionType::CONTACT_DELETE->value
         );
 
-        $this->contactManager->delete($contact, $this->getUser());
+        $this->deleter->delete($contact, $this->getUser());
 
         return $this->json(null, 204);
+    }
+
+    #[Route('/{id}/restore', name: 'app_contact_restore', methods: ['POST'])]
+    public function restore(
+        int $id
+    ): JsonResponse {
+        $contact = $this->contactManager->get($id);
+
+        $this->denyAccessUnlessGranted(
+            PermissionType::CONTACT_RESTORE->value
+        );
+
+        $this->restorer->restore($contact, $this->getUser());
+
+        return $this->json(
+            ContactMapper::toDTO($contact)
+        );
     }
 }

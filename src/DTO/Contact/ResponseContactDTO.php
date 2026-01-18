@@ -12,6 +12,7 @@ final class ResponseContactDTO
         public string $status,
         public string $type,
         public string $created_at,
+        public ?string $deleted_at
     )
     {}
 }

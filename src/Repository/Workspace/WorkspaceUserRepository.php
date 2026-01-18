@@ -48,7 +48,8 @@ class WorkspaceUserRepository extends ServiceEntityRepository
     public function findByUserPaginated(
         int $page,
         int $limit,
-        User $user
+        User $user,
+        ?bool $includeDeleted = false
     ) : array {
         $qb = $this->createQueryBuilder('wu')
             ->join('wu.workspace', 'w')
@@ -56,6 +57,10 @@ class WorkspaceUserRepository extends ServiceEntityRepository
             ->setFirstResult(($page - 1) * $limit)
             ->setMaxResults($limit)
             ->setParameter('user', $user);
+
+        if(!$includeDeleted) {
+            $qb->andWhere('c.deleted_at IS NULL');
+        }
 
         $paginator = new Paginator($qb);
         $total = count($paginator);

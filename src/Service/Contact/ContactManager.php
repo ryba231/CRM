@@ -66,9 +66,10 @@ final class ContactManager
         Workspace $workspace,
         int $page,
         int $limit,
-        ?string $search
+        ?string $search,
+        ?bool $includeDeleted
     ) : array {
-        return $this->contactRepository->findByWorkspacePaginated($workspace, $page, $limit, $search);
+        return $this->contactRepository->findByWorkspacePaginated($workspace, $page, $limit, $search, $includeDeleted);
     }
 
     public function update(
@@ -94,17 +95,6 @@ final class ContactManager
         }
 
         return $contact;
-    }
-
-    public function delete(
-        Contact $contact,
-        User $actor
-    ) : void {
-        $this->entityManager->remove($contact);
-
-        $this->dispatcher->dispatch(new ContactDeletedEvent($contact, $actor), 'contact.deleted');
-
-        $this->entityManager->flush();
     }
 
     private function auditLogData(

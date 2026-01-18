@@ -13,7 +13,8 @@ class WorkspaceMapper
             $workspace->getId(),
             $workspace->getName(),
             $workspace->getCreatedAt()->format('Y-m-d H:i:s'),
-            $workspace->getUpdatedAt()->format('Y-m-d H:i:s')
+            $workspace->getUpdatedAt()->format('Y-m-d H:i:s'),
+            $workspace->getDeletedAt()?->format('Y-m-d H:i:s')
         );
     }
 }

@@ -43,6 +43,17 @@ class WorkspaceRepository extends ServiceEntityRepository
             ->getOneOrNullResult();
     }
 
+    public function findExpiredSoftDeleted(
+        \DateTimeImmutable $before
+    ) : array {
+        return $this->createQueryBuilder('w')
+            ->andWhere('w.deleted_at IS NOT NULL')
+            ->andWhere('w.deleted_at < :before')
+            ->setParameter('before', $before)
+            ->getQuery()
+            ->getResult();
+    }
+
     //    /**
     //     * @return Workspace[] Returns an array of Workspace objects
     //     */

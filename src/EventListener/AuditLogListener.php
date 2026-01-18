@@ -4,8 +4,11 @@ namespace App\EventListener;
 
 use App\Event\ContactCreatedEvent;
 use App\Event\ContactDeletedEvent;
+use App\Event\ContactRestoredEvent;
 use App\Event\ContactUpdatedEvent;
 use App\Event\Enum\AuditAction;
+use App\Event\UserDeletedEvent;
+use App\Event\UserRestoredEvent;
 use App\Event\WorkspaceCreatedEvent;
 use App\Event\WorkspaceDeletedEvent;
 use App\Event\WorkspaceUpdatedEvent;
@@ -61,6 +64,19 @@ final class AuditLogListener
         );
     }
 
+    #[AsEventListener(event: 'contact.restored')]
+    public function onContactRestored(
+        ContactRestoredEvent $event
+    ) : void {
+        $this->auditLogManager->log(
+            entity: 'Contact',
+            entityId: $event->contact->getId(),
+            action: AuditAction::RESTORE->value,
+            changes: null,
+            userId: $event->actor->getId()
+        );
+    }
+
     #[AsEventListener(event: 'workspace.created')]
     public function onWorkspaceCreated(
         WorkspaceCreatedEvent $event
@@ -95,6 +111,19 @@ final class AuditLogListener
             entity: 'Workspace',
             entityId: $event->workspace->getId(),
             action: AuditAction::DELETE->value,
+            changes: null,
+            userId: $event->actor->getId()
+        );
+    }
+
+    #[AsEventListener(event: 'workspace.restored')]
+    public function onWorkspaceRestored(
+        WorkspaceDeletedEvent $event
+    ) : void {
+        $this->auditLogManager->log(
+            entity: 'Workspace',
+            entityId: $event->workspace->getId(),
+            action: AuditAction::RESTORE->value,
             changes: null,
             userId: $event->actor->getId()
         );
@@ -139,5 +168,30 @@ final class AuditLogListener
         );    
     }
 
+    #[AsEventListener(event: 'user.deleted')]
+    public function onUserDeleted(
+        UserDeletedEvent $event
+    ) : void {
+        $this->auditLogManager->log(
+            entity: 'User',
+            entityId: $event->user->getId(),
+            action: AuditAction::DELETE->value,
+            changes: null,
+            userId: $event->actor->getId()
+        );
+    }
+
+    #[AsEventListener(event: 'user.restored')]
+    public function onUserRestored(
+        UserRestoredEvent $event
+    ) : void {
+        $this->auditLogManager->log(
+            entity: 'User',
+            entityId: $event->user->getId(),
+            action: AuditAction::RESTORE->value,
+            changes: null,
+            userId: $event->actor->getId()
+        );
+    }
 
 }

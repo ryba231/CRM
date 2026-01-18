@@ -5,19 +5,24 @@ use App\DTO\User\RegisterUserDTO;
 use App\DTO\User\UpdateUserDTO;
 use App\Entity\User\User;
 use App\Mapper\User\UserMapper;
+use App\Service\User\UserDeleter;
 use App\Service\User\UserManager;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use App\Service\User\UserRestorer;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route('/api/v1/admin/users')]
-class UserAdminController extends BaseApiController
+final class UserAdminController extends BaseApiController
 {
-    public function __construct(private UserManager $userManager) {}
+    public function __construct(
+        private UserManager $userManager,
+        private UserDeleter $deleter,
+        private UserRestorer $restorer
+    ) {}
 
-    #[Route(name: 'app_users', methods: ['GET'])]
+    #[Route(name: 'app_admin_users', methods: ['GET'])]
     public function list(
         Request $request
         ): JsonResponse {
@@ -45,7 +50,7 @@ class UserAdminController extends BaseApiController
                 200);
     }
 
-    #[Route('/{id}', name: 'app_user_get', methods: ['GET'])]
+    #[Route('/{id}', name: 'app_admin_user_get', methods: ['GET'])]
     public function get(
         int $id
     ) : JsonResponse {
@@ -56,7 +61,7 @@ class UserAdminController extends BaseApiController
         );
     }
 
-    #[Route('', name: 'app_users_create', methods: ['POST'])]
+    #[Route('', name: 'app_admin_users_create', methods: ['POST'])]
     public function create(
         Request $request,
         ValidatorInterface $validator
@@ -85,7 +90,7 @@ class UserAdminController extends BaseApiController
         );
     }
 
-    #[Route('/{id}', name: 'app_user_update', methods: ['PATCH'])]
+    #[Route('/{id}', name: 'app_admin_user_update', methods: ['PATCH'])]
     public function update(
         int $id,
         Request $request,
@@ -118,16 +123,34 @@ class UserAdminController extends BaseApiController
         );
     }
 
-    #[Route('/{id}', name: 'app_user_delete', methods: ['DELETE'])]
+    #[Route('/{id}', name: 'app_admin_user_delete', methods: ['DELETE'])]
     public function delete(
         int $id
     ) : JsonResponse {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
 
-        $this->userManager->delete(
-            $this->userManager->get($id)
+        $this->deleter->delete(
+            $this->userManager->get($id),
+            $this->getUser()
         );
 
         return $this->json(null,204);
+    }
+
+    #[Route('/{id}/restore', name: 'app_admin_user_restore', methods: ['POST'])]
+    public function restore(
+        int $id
+    ) : JsonResponse {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
+        $user = $this->userManager->get($id);
+        $this->restorer->restore(
+            $user,
+            $this->getUser()
+        );
+
+        return $this->json(
+            UserMapper::toDTO($user)
+        );
     }
 }

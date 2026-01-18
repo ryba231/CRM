@@ -7,9 +7,9 @@ use App\Event\WorkspaceDeletedEvent;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
-final readonly class WorkspaceDeletionService {
+final readonly class WorkspaceDeleter {
     public function __construct(
-        private EntityManagerInterface $em,
+        private EntityManagerInterface $entityManager,
         private EventDispatcherInterface $dispatcher
     ) {}
 
@@ -18,8 +18,10 @@ final readonly class WorkspaceDeletionService {
         Workspace $workspace,
         User $actor
     ) : void {
+        if ($workspace->isDeleted()) return;
+
         $workspace->softDelete();
-        $this->em->flush();
+        $this->entityManager->flush();
 
         $this->dispatcher->dispatch(new WorkspaceDeletedEvent($workspace, $actor), 'workspace.deleted');
     }

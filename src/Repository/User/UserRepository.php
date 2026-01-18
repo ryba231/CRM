@@ -45,6 +45,17 @@ class UserRepository extends ServiceEntityRepository
         return $user;
     }
 
+    public function findExpiredSoftDeleted(
+        \DateTimeImmutable $before
+    ) : array {
+        return $this->createQueryBuilder('u')
+            ->andWhere('u.deleted_at IS NOT NULL')
+            ->andWhere('u.deleted_at < :before')
+            ->setParameter('before', $before)
+            ->getQuery()
+            ->getResult();
+    }
+
     //    /**
     //     * @return User[] Returns an array of User objects
     //     */

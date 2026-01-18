@@ -7,7 +7,7 @@ use App\DTO\Workspace\UpdateWorkspaceDTO;
 use App\Entity\Workspace\WorkspaceUser;
 use App\Mapper\Workspace\WorkspaceMapper;
 use App\Mapper\Workspace\WorkspaceUserMapper;
-use App\Service\Workspace\WorkspaceDeletionService;
+use App\Service\Workspace\WorkspaceDeleter;
 use App\Service\Workspace\WorkspaceManager;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -19,6 +19,7 @@ final class WorkspaceController extends BaseApiController
 {
     public function __construct(
         private WorkspaceManager $workspaceManager,
+        private WorkspaceDeleter $deleter
     ) {}
 
     #[Route(name: 'app_workspace_list', methods: ['GET'])]
@@ -27,9 +28,10 @@ final class WorkspaceController extends BaseApiController
     ) : JsonResponse {
         $page = max(1, $request->query->getInt('page', 1));
         $limit = min(50, max(1, $request->query->getInt('limit', 10)));
+        $includeDeleted = $request->query->getBoolean('includeDeleted');
         $owner = $this->getUser();
 
-        $result = $this->workspaceManager->getAllWorkspace($page, $limit, $owner);
+        $result = $this->workspaceManager->getAllWorkspace($page, $limit, $owner, $includeDeleted);
 
         $workspaceDto = array_map(
             fn(WorkspaceUser $workspaceUser) => WorkspaceUserMapper::workspaceToDTO($workspaceUser),
@@ -117,13 +119,24 @@ final class WorkspaceController extends BaseApiController
     }
     #[Route('/{id}', name: 'app_workspace_delete', methods: ['DELETE'])]
     public function delete(
-        int $id,
-        WorkspaceDeletionService $service
+        int $id
     ) : JsonResponse {
         
         $workspace = $this->workspaceManager->getDeletableForUser($id,$this->getUser());
 
-        $service->delete($workspace, $this->getUser());
+        $this->deleter->delete($workspace, $this->getUser());
+
+        return $this->json(null, 204);
+    }
+
+    #[Route('/{id}/restore', name: 'app_workspace_restore', methods: ['POST'])]
+    public function restore(
+        int $id
+    ) : JsonResponse {
+        
+        $workspace = $this->workspaceManager->getDeletableForUser($id,$this->getUser());
+
+        $this->deleter->delete($workspace, $this->getUser());
 
         return $this->json(null, 204);
     }

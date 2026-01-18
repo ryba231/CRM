@@ -164,6 +164,10 @@ class Workspace
         $this->deleted_at = new \DateTimeImmutable();    
     }
 
+    public function restore() : void {
+        $this->deleted_at = null;
+    }
+
     public function isDeleted(): bool
     {
         return $this->deleted_at !== null;

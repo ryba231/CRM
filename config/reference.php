@@ -1397,6 +1397,34 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *         cache?: scalar|null, // Storage to track blocked tokens // Default: "cache.app"
  *     },
  * }
+ * @psalm-type NelmioCorsConfig = array{
+ *     defaults?: array{
+ *         allow_credentials?: bool, // Default: false
+ *         allow_origin?: list<scalar|null>,
+ *         allow_headers?: list<scalar|null>,
+ *         allow_methods?: list<scalar|null>,
+ *         allow_private_network?: bool, // Default: false
+ *         expose_headers?: list<scalar|null>,
+ *         max_age?: scalar|null, // Default: 0
+ *         hosts?: list<scalar|null>,
+ *         origin_regex?: bool, // Default: false
+ *         forced_allow_origin_value?: scalar|null, // Default: null
+ *         skip_same_as_origin?: bool, // Default: true
+ *     },
+ *     paths?: array<string, array{ // Default: []
+ *         allow_credentials?: bool,
+ *         allow_origin?: list<scalar|null>,
+ *         allow_headers?: list<scalar|null>,
+ *         allow_methods?: list<scalar|null>,
+ *         allow_private_network?: bool,
+ *         expose_headers?: list<scalar|null>,
+ *         max_age?: scalar|null, // Default: 0
+ *         hosts?: list<scalar|null>,
+ *         origin_regex?: bool,
+ *         forced_allow_origin_value?: scalar|null, // Default: null
+ *         skip_same_as_origin?: bool,
+ *     }>,
+ * }
  * @psalm-type ConfigType = array{
  *     imports?: ImportsConfig,
  *     parameters?: ParametersConfig,
@@ -1407,6 +1435,7 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *     doctrine_migrations?: DoctrineMigrationsConfig,
  *     security?: SecurityConfig,
  *     lexik_jwt_authentication?: LexikJwtAuthenticationConfig,
+ *     nelmio_cors?: NelmioCorsConfig,
  *     "when@dev"?: array{
  *         imports?: ImportsConfig,
  *         parameters?: ParametersConfig,
@@ -1420,6 +1449,7 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *         maker?: MakerConfig,
  *         security?: SecurityConfig,
  *         lexik_jwt_authentication?: LexikJwtAuthenticationConfig,
+ *         nelmio_cors?: NelmioCorsConfig,
  *     },
  *     "when@prod"?: array{
  *         imports?: ImportsConfig,
@@ -1431,6 +1461,7 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *         doctrine_migrations?: DoctrineMigrationsConfig,
  *         security?: SecurityConfig,
  *         lexik_jwt_authentication?: LexikJwtAuthenticationConfig,
+ *         nelmio_cors?: NelmioCorsConfig,
  *     },
  *     "when@test"?: array{
  *         imports?: ImportsConfig,
@@ -1443,6 +1474,7 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *         doctrine_migrations?: DoctrineMigrationsConfig,
  *         security?: SecurityConfig,
  *         lexik_jwt_authentication?: LexikJwtAuthenticationConfig,
+ *         nelmio_cors?: NelmioCorsConfig,
  *     },
  *     ...<string, ExtensionType|array{ // extra keys must follow the when@%env% pattern or match an extension alias
  *         imports?: ImportsConfig,

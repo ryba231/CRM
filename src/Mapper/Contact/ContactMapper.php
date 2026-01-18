@@ -16,7 +16,8 @@ class ContactMapper
             $contact->getPhone(),
             $contact->getStatus(),
             $contact->getType(),
-            $contact->getCreatedAt()->format('Y-m-d H:i:s')
+            $contact->getCreatedAt()->format('Y-m-d H:i:s'),
+            $contact->getDeletedAt()?->format('Y-m-d H:i:s')
         );
     }
 }

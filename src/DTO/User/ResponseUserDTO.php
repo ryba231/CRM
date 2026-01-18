@@ -10,5 +10,6 @@ final class ResponseUserDTO
         public string $lastName,
         public array $roles,
         public string $created_at,
+        public ?string $deleted_at
     ) {}
 }
