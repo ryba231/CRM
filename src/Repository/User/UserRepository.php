@@ -50,10 +50,15 @@ class UserRepository extends ServiceEntityRepository
     ) : array {
         return $this->createQueryBuilder('u')
             ->andWhere('u.deleted_at IS NOT NULL')
+            ->andWhere('u.anonymized__at IS NULL')
             ->andWhere('u.deleted_at < :before')
             ->setParameter('before', $before)
             ->getQuery()
             ->getResult();
+    }
+
+    public function getSystemUser() : User {
+        return $this->find(1) ?? throw new \LogicException('System user missing');
     }
 
     //    /**

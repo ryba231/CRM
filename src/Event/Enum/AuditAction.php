@@ -7,6 +7,7 @@ enum AuditAction: string
     case UPDATE = 'update';
     case DELETE = 'delete';
     case RESTORE = 'restore';
+    case ANONYMIZE = 'anonymize';
     
     case USER_ADDED = 'user.added';
     case USER_DELETED = 'user.deleted';

@@ -3,24 +3,21 @@
 namespace App\Command;
 
 use App\Repository\User\UserRepository;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Service\User\UserAnonymizer;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
-    name: 'app:cleanup:users',
-    description: 'Hard delete users',
+    name: 'app:anonymize:users',
+    description: 'Anonymize users',
 )]
-class CleanupUsersCommand extends Command
+class AnonymizeUsersCommand extends Command
 {
     public function __construct(
         private readonly UserRepository $userRepository,
-        private readonly EntityManagerInterface $entityManager,
+        private readonly UserAnonymizer $anonymizer,
         private readonly int $softDeleteRetentionDays
     ) {
         parent::__construct();
@@ -30,14 +27,13 @@ class CleanupUsersCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $before = new \DateTimeImmutable(sprintf('-%d days', $this->softDeleteRetentionDays));
-
+        $systemUser = $this->userRepository->getSystemUser();
+        
         $users = $this->userRepository->findExpiredSoftDeleted($before);
 
         foreach($users as $user){
-            $this->entityManager->remove($user);
+            $this->anonymizer->anonymize($user, $systemUser);
         }
-
-        $this->entityManager->flush();
 
        $output->writeln(sprintf('Deleted %d users', count($users)));
 

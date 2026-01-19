@@ -7,6 +7,7 @@ use App\Event\ContactDeletedEvent;
 use App\Event\ContactRestoredEvent;
 use App\Event\ContactUpdatedEvent;
 use App\Event\Enum\AuditAction;
+use App\Event\UserAnonymizedEvent;
 use App\Event\UserDeletedEvent;
 use App\Event\UserRestoredEvent;
 use App\Event\WorkspaceCreatedEvent;
@@ -184,6 +185,19 @@ final class AuditLogListener
     #[AsEventListener(event: 'user.restored')]
     public function onUserRestored(
         UserRestoredEvent $event
+    ) : void {
+        $this->auditLogManager->log(
+            entity: 'User',
+            entityId: $event->user->getId(),
+            action: AuditAction::RESTORE->value,
+            changes: null,
+            userId: $event->actor->getId()
+        );
+    }
+
+    #[AsEventListener(event: 'user.anonymized')]
+    public function onUserAnonymized(
+        UserAnonymizedEvent $event
     ) : void {
         $this->auditLogManager->log(
             entity: 'User',

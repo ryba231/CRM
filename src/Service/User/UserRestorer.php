@@ -21,6 +21,7 @@ final class UserRestorer
         if(!$user->isDeleted()) throw new DomainException('Contact is not deleted');
 
         $user->restore();
+        $user->setIsActive(true);
         $this->entityManager->flush();
 
         $this->dispatcher->dispatch(new UserRestoredEvent($user, $actor), 'user.restored');

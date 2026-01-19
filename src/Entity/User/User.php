@@ -55,6 +55,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $deleted_at = null;
 
+    #[ORM\Column(type: 'datetime_immutable',nullable: true)]
+    private ?\DateTimeImmutable $anonymized_at = null;
+
+    #[ORM\Column(type: 'boolean')]
+    private ?bool $is_active = true;
+
     public function __construct()
     {
         $this->contacts = new ArrayCollection();
@@ -233,5 +239,39 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function isDeleted() : bool {
         return $this->deleted_at !== null;
+    }
+
+    public function getAnonymizedAt(): ?\DateTimeImmutable
+    {
+        return $this->anonymized_at;
+    }
+
+    public function setAnonymizedAt(?\DateTimeImmutable $anonymized_at): static
+    {
+        $this->anonymized_at = $anonymized_at;
+
+        return $this;
+    }
+
+    public function isActive(): ?bool
+    {
+        return $this->is_active;
+    }
+
+    public function setIsActive(bool $is_active): static
+    {
+        $this->is_active = $is_active;
+
+        return $this;
+    }
+
+    public function anonymize() : void {
+        if($this->anonymized_at !== null) return;
+
+        $this->email = sprintf('anon_%s@deleted.local', $this->getId());
+        $this->first_name = 'Anonim-' . bin2hex(random_bytes(4));
+        $this->last_name = 'Anonim-' . bin2hex(random_bytes(4));
+        $this->is_active = false;
+        $this->anonymized_at = new \DateTimeImmutable();
     }
 }
