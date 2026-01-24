@@ -8,7 +8,7 @@ use Doctrine\ORM\EntityManagerInterface;
 final readonly class AuditLogManager 
 {
     public function __construct(
-        private EntityManagerInterface $em
+        private EntityManagerInterface $entityManager
     ) {}
 
     public function log(
@@ -26,7 +26,7 @@ final readonly class AuditLogManager
             userId: $userId
         );
 
-        $this->em->persist($audit);
-        $this->em->flush();
+        $this->entityManager->persist($audit);
+        $this->entityManager->flush();
     }
 }

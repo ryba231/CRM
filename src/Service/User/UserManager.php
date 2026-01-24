@@ -59,6 +59,12 @@ final class UserManager
         return $this->userRepository->findOrFail($id);
     }
 
+    public function getByEmail(
+        string $email
+    ): ?User {
+        return $this->userRepository->findByEmail($email);
+    }
+
     public function getAllUsers(
         int $page,
         int $limit

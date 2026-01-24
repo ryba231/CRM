@@ -3,6 +3,7 @@
 namespace App\Entity\User;
 
 use App\Entity\Contact\Contact;
+use App\Entity\LoginAttempt\LoginAttempt;
 use App\Entity\Workspace\WorkspaceUser;
 use App\Repository\User\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -61,10 +62,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'boolean')]
     private ?bool $is_active = true;
 
+    /**
+     * @var Collection<int, LoginAttempt>
+     */
+    #[ORM\OneToMany(targetEntity: LoginAttempt::class, mappedBy: 'user')]
+    private Collection $login_attempts;
+
     public function __construct()
     {
         $this->contacts = new ArrayCollection();
         $this->workspaceMemberships = new ArrayCollection();
+        $this->login_attempts = new ArrayCollection();
     }
 
     public function getFullName() : ?string 
@@ -273,5 +281,35 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->last_name = 'Anonim-' . bin2hex(random_bytes(4));
         $this->is_active = false;
         $this->anonymized_at = new \DateTimeImmutable();
+    }
+
+    /**
+     * @return Collection<int, LoginAttempt>
+     */
+    public function getLoginAttempts(): Collection
+    {
+        return $this->login_attempts;
+    }
+
+    public function addLoginAttempt(LoginAttempt $loginAttempt): static
+    {
+        if (!$this->login_attempts->contains($loginAttempt)) {
+            $this->login_attempts->add($loginAttempt);
+            $loginAttempt->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeLoginAttempt(LoginAttempt $loginAttempt): static
+    {
+        if ($this->login_attempts->removeElement($loginAttempt)) {
+            // set the owning side to null (unless already changed)
+            if ($loginAttempt->getUser() === $this) {
+                $loginAttempt->setUser(null);
+            }
+        }
+
+        return $this;
     }
 }
