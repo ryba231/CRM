@@ -28,18 +28,24 @@ class WorkspaceRepository extends ServiceEntityRepository
 
     public function findDeletableForUser(
         int $workspaceId,
-        User $user
+        User $user,
+        ?bool $includeDeleted = false
     ) : ?Workspace {
-        return $this->createQueryBuilder('w')
+        
+        $qb = $this->createQueryBuilder('w')
             ->join('w.memberships', 'wu')
             ->andWhere('wu.user = :user')
             ->andWhere('wu.role = :role')
             ->andWhere('w.id = :id')
-            ->andWhere('w.deleted_at IS NULL')
             ->setParameter('user', $user)
             ->setParameter('role', 'owner')
-            ->setParameter('id', $workspaceId)
-            ->getQuery()
+            ->setParameter('id', $workspaceId);
+        
+        if(!$includeDeleted) {
+            $qb->andWhere('w.deleted_at IS NULL');
+        }
+            
+        return $qb->getQuery()
             ->getOneOrNullResult();
     }
 

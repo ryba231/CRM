@@ -19,7 +19,7 @@ final readonly class WorkspaceRestorer {
         Workspace $workspace,
         User $actor
     ) : void {
-        if(!$workspace->isDeleted()) throw new DomainException('Contact is not deleted');
+        if(!$workspace->isDeleted()) throw new DomainException('Workspace is not deleted');
 
         $workspace->restore();
         $this->entityManager->flush();

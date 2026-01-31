@@ -137,9 +137,10 @@ final class WorkspaceManager {
 
     public function getDeletableForUser(
         int $workspaceId,
-        User $user
+        User $user,
+        ?bool $includeDeleted = false
     ): ?Workspace  {
-        $workspace = $this->workspaceRepository->findDeletableForUser($workspaceId, $user);
+        $workspace = $this->workspaceRepository->findDeletableForUser($workspaceId, $user, $includeDeleted);
 
         if(!$workspace) throw new NotFoundHttpException('Workspace not found');
 

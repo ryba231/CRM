@@ -9,6 +9,7 @@ use App\Mapper\Workspace\WorkspaceMapper;
 use App\Mapper\Workspace\WorkspaceUserMapper;
 use App\Service\Workspace\WorkspaceDeleter;
 use App\Service\Workspace\WorkspaceManager;
+use App\Service\Workspace\WorkspaceRestorer;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
@@ -19,7 +20,8 @@ final class WorkspaceController extends BaseApiController
 {
     public function __construct(
         private WorkspaceManager $workspaceManager,
-        private WorkspaceDeleter $deleter
+        private WorkspaceDeleter $deleter,
+        private WorkspaceRestorer $restorer
     ) {}
 
     #[Route(name: 'app_workspace_list', methods: ['GET'])]
@@ -134,9 +136,9 @@ final class WorkspaceController extends BaseApiController
         int $id
     ) : JsonResponse {
         
-        $workspace = $this->workspaceManager->getDeletableForUser($id,$this->getUser());
+        $workspace = $this->workspaceManager->getDeletableForUser($id,$this->getUser(), true);
 
-        $this->deleter->delete($workspace, $this->getUser());
+        $this->restorer->restore($workspace, $this->getUser());
 
         return $this->json(null, 204);
     }

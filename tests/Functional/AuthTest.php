@@ -6,9 +6,10 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Doctrine\ORM\EntityManagerInterface;
 use App\DataFixtures\UserFixtures;
 use App\Repository\User\UserRepository;
+use App\Tests\Support\DatabaseWebTestCase;
 use Doctrine\DBAL\Connection;
 
-class AuthTest extends WebTestCase
+class AuthTest extends DatabaseWebTestCase
 {
     private ?EntityManagerInterface $em = null;
     private ?Connection $connection = null;

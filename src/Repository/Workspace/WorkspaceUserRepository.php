@@ -59,7 +59,7 @@ class WorkspaceUserRepository extends ServiceEntityRepository
             ->setParameter('user', $user);
 
         if(!$includeDeleted) {
-            $qb->andWhere('c.deleted_at IS NULL');
+            $qb->andWhere('w.deleted_at IS NULL');
         }
 
         $paginator = new Paginator($qb);

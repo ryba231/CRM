@@ -15,6 +15,7 @@ use App\Event\WorkspaceDeletedEvent;
 use App\Event\WorkspaceUpdatedEvent;
 use App\Event\WorkspaceAddedUserEvent;
 use App\Event\WorkspaceDeletedUserEvent;
+use App\Event\WorkspaceRestoredEvent;
 use App\Event\WorkspaceRoleChangedUserEvent;
 use App\Service\AuditLog\AuditLogManager;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
@@ -119,7 +120,7 @@ final class AuditLogListener
 
     #[AsEventListener(event: 'workspace.restored')]
     public function onWorkspaceRestored(
-        WorkspaceDeletedEvent $event
+        WorkspaceRestoredEvent $event
     ) : void {
         $this->auditLogManager->log(
             entity: 'Workspace',
