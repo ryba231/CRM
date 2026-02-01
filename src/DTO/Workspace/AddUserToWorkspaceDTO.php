@@ -9,6 +9,7 @@ final class AddUserToWorkspaceDTO {
     #[Assert\Email(message: 'Invalid email')]
     public ?string $email = null;
 
+    #[Assert\NotBlank]
     #[Assert\Choice(choices:['admin','member'])]
     public ?string $role = null;
 }
